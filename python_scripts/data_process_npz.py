@@ -9,7 +9,7 @@ import os.path
 import sys
 
 data_dir = sys.argv[1]
-file_name = "Results.txt"
+file_name = "result.txt"
 
 if len(sys.argv)>1:
     all_data = sys.argv[2]

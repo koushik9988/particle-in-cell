@@ -156,12 +156,13 @@ K = K*(LD)  # Normalized K
 #+++++++++++++++++++++ Raw Analytic Part Calculation ++++++++++++++++++++++++++++++
 raw_analytic = True
 if raw_analytic:    
-    wla = np.sqrt((we**2*(1 + 3*k**2*LD**2)))    
+    #wla = np.sqrt((we**2*(1 + 0.5*3*k**2*LD**2)))
+    wla = np.sqrt(we**2 + (3/2)*(we*LD)**2*k**2)    
     ep = wla/we    # Electron Plasma Wave (Langmuir Wave)
     
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-F_real = np.real(F)
-F_imag = np.imag(F)
+#F_real = np.real(F)
+#F_imag = np.imag(F)
 Z = np.log(np.abs(F))
 #Z = np.abs(F)
 
@@ -183,7 +184,7 @@ mp.rc('legend', fontsize=10)
 #fig,ax = plt.subplots(figsize=figsize/25.4,constrained_layout=True,dpi=ppi)
 fig, ax = plt.subplots()
 #c1 = plt.pcolor(K, Omega, Z,cmap='rainbow',shading='auto',vmin=np.min(Z),vmax=np.max(Z))##
-#c1 = plt.pcolor(K, Omega, Z,cmap='coolwarm',shading='auto',vmin=-6,vmax=6)
+c1 = plt.pcolor(K, Omega, Z, cmap='rainbow',shading='auto',vmin= - 3,vmax = 3)
 c1 = plt.contourf(K, Omega, Z, cmap='rainbow',shading='auto',vmin=np.min(Z),vmax=np.max(Z))
 #c2 = plt.contourf(K, Omega, z, cmap='rainbow',shading='auto',vmin=np.min(z),vmax=np.max(z))
 #plt.contourf(K, Omega, f, cmap='rainbow',shading='auto',vmin=np.min(f),vmax=np.max(f))
@@ -191,8 +192,8 @@ c1 = plt.contourf(K, Omega, Z, cmap='rainbow',shading='auto',vmin=np.min(Z),vmax
 
 print(np.min(Z), np.max(Z))
 
-#if raw_analytic:
-    #plt.plot(k*LD, ep, color='k', linestyle='--', lw = 1.0, label='$EPW$')
+if raw_analytic:
+    plt.plot(k*LD, ep, color='k', linestyle='--', lw = 1.0, label='$EPW$')
 
 # Note: Changing vmin & vmax will change the depth of the plots.
 cbar = plt.colorbar()
@@ -202,7 +203,7 @@ ax.set_xlabel('$k \lambda_{D}$')
 ax.set_ylabel('$\omega/\omega_{pe}$')
 #ax.set_xlim([0, np.max(K)])
 ax.set_xlim([0,3.0])
-ax.set_ylim([0,6])
+ax.set_ylim([0,5])
 leg = ax.legend(loc='upper right',framealpha=0.5)
 plt.savefig(pjoin(path,'dispersion.png'),dpi=dpi)
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
