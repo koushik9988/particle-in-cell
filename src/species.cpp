@@ -65,6 +65,29 @@ void Species::Push_species()
     }
 }
 
+void Species::Push_species_open()
+{
+    for (auto it = part_list.begin(); it != part_list.end();)
+    {
+        Particle &part = *it;
+        double lc = domain.XtoL(part.pos);
+        double qm = charge / mass;
+        double part_ef = domain.Interpolate(lc, domain.ef);
+        double wl = domain.LD * domain.LD * domain.wp * domain.wp;
+        part.vel += (1 / wl) * ((qm * domain.tempE * Const::eV) / Const::QE) * part_ef * domain.DT;
+        part.pos += part.vel * domain.DT;
+
+        if (part.pos < domain.x0 || part.pos >= domain.x0 + domain.xL)
+        {
+            it = part_list.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
 void Species::update(int start, int end)
 {
     for(int i = start; i < end; i++)
@@ -94,7 +117,6 @@ void Species::update(int start, int end)
 		{
 			part.pos = part.pos - domain.xL;
 		}
-
     }
 }
 
@@ -138,7 +160,7 @@ void Species::ScatterSpecies()
 
     for(int i=0; i<domain.ni; i++)
     {
-    	field[i] /= domain.dx;
+    	field[i] /= domain.dx*domain.LD;
     }
 
 	/*Normalize the field value*/
@@ -148,9 +170,17 @@ void Species::ScatterSpecies()
         //cout<<den[i]-field[i]<<endl;
     }
 
-    field[0] += field[domain.ni-1];
-    field[domain.ni-1] =  field[0];
-    
+    if(domain.bc == "pbc")
+    {
+        field[0] += field[domain.ni-1];
+        field[domain.ni-1] =  field[0];
+    }
+    else if(domain.bc == "open")
+    {
+        field[0] *= 2;
+        field[domain.ni-1] *= 2;
+    }
+
     //domain.printmat(field);
 }
 
