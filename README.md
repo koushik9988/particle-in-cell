@@ -95,6 +95,12 @@ The input file `input.ini` contains parameters for configuring the simulation. E
    - 1: pbc for periodic boundary.
    - 2: open for open boundary condition.
 
+ # Data processing and visualization
+ 1. Compress the result.txt file
+     ```bash
+    python3 data_process_npz.py ../name_of_outputfolder/files/ result.txt True
+    ```
+
 
 
 ![dispersion](https://github.com/koushik9988/particle-in-cell/assets/55924787/5d278d78-2755-4293-bf18-4f8a09789b8c)
