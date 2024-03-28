@@ -60,7 +60,7 @@ The input file `input.ini` contains parameters for configuring the simulation. E
 - **write_interval_phase**: Interval for writing phase-space data file.
 - **write_diagnostics**: Interval for writing diagnostic outputs.
 - **DT_coeff**: Time step.
-  $dt = DT_{coeff}*\frac{1}{\omega_{pe}}$
+  \[ dt = DT_{\text{coeff}} \times \frac{1}{\omega_{\text{pe}}} \]
   
 
 - **write_flag**: Flag for controlling data writing: 
