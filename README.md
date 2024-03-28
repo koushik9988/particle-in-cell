@@ -92,6 +92,8 @@ The input file `input.ini` contains parameters for configuring the simulation. E
 - **alpha**: Fraction of negative ion to background positive ion
 - **beta**: fraction of negative beam to background negative ion 
 - **bc**: Boundary condition.
+   - 1: pbc for periodic boundary.
+   - 2: open for open boundary condition.
 
 
 
