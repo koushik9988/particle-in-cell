@@ -59,7 +59,7 @@ The input file `input.ini` contains parameters for configuring the simulation. E
 - **write_interval**: Interval for writing density and field data in result.txt file.
 - **write_interval_phase**: Interval for writing phase-space data file.
 - **write_diagnostics**: Interval for writing diagnostic outputs.
-- **DT_coeff**: Coefficient for the time step.
+- **DT_coeff**: Time step. ($dt = DT_coeff*\frac{1}{\omega_{pe}}$)
 - **write_flag**: Flag for controlling data writing: 
   - 1: Write both phase and field data.
   - 2: Write only field data.
