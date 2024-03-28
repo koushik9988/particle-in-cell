@@ -63,7 +63,7 @@ The input file `input.ini` contains parameters for configuring the simulation. E
   
  $$dt = DT_{\text{coeff}} \times \frac{1}{\omega_{\text{pe}}}$$
 
- $$dt = DT_{\text{coeff}} \times \frac{1}{\omega_{\text{pe}}}*{\omega_{pe}}$$
+ $$dt = DT_{\text{coeff}} \times \frac{1}{\omega_{\text{pe}}}{\omega_{pe}}$$
 
   
 
