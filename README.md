@@ -113,6 +113,10 @@ The input file `input.ini` contains parameters for configuring the simulation. E
      ```bash
     python3 plot.py ../name_of_outputfolder/files/
     ```
+
+## Contributors
+- John Doe (@johndoe)
+- Jane Smith (@janesmith)
   
 
 
