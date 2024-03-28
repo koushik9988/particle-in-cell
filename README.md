@@ -100,6 +100,12 @@ The input file `input.ini` contains parameters for configuring the simulation. E
      ```bash
     python3 data_process_npz.py ../name_of_outputfolder/files/ result.txt True
     ```
+ 2. Plot dispersion
+    Compress the result.txt file
+     ```bash
+    python3 dispersion_npz_EF.py ../name_of_outputfolder/files/ 
+    ```
+  
 
 
 
