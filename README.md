@@ -63,6 +63,8 @@ The input file `input.ini` contains parameters for configuring the simulation. E
   
  $$dt = DT_{\text{coeff}} \frac{1}{\omega_{\text{pe}}}$$
 
+ Normalized time step
+
  $$dt = DT_{\text{coeff}} \frac{1}{\omega_{\text{pe}}}{\omega_{pe}}$$
 
   
