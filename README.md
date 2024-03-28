@@ -2,6 +2,8 @@
 
 This repository contains an electrostatic 1D Particle-in-Cell (PIC) code developed for simulating plasma systems. The code is capable of simulating basic plasma phenomena.
 
+![dispersion](https://github.com/koushik9988/particle-in-cell/assets/55924787/5d278d78-2755-4293-bf18-4f8a09789b8c)
+
 ## Requirements
 - Python3
 - GNU C++ compiler(g++)
@@ -114,4 +116,3 @@ The input file `input.ini` contains parameters for configuring the simulation. E
 
 
 
-![dispersion](https://github.com/koushik9988/particle-in-cell/assets/55924787/5d278d78-2755-4293-bf18-4f8a09789b8c)
