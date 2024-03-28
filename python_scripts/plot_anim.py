@@ -9,20 +9,17 @@ import configparser
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 
 
-script_path = os.path.dirname(os.path.realpath(__file__))
 
-# Construct the path to the input.ini file
+script_path = os.path.dirname(os.path.realpath(__file__))
 config_path = pjoin(script_path, '..', 'input.ini')
 
 # Read the configuration file
 config = configparser.ConfigParser()
 config.read(config_path)
 file_name = 'processed_results_all.npz'
-#path = './'
 path = sys.argv[1]
 
 # Constants and data loading
-# Constants
 eps0 = constants('electric constant')
 kb = constants('Boltzmann constant')
 me = constants('electron mass')
@@ -85,8 +82,8 @@ ndi = ndi.reshape(DATA_TS, (NC+1))
 x=x.reshape(DATA_TS,(NC+1))
 
 # Load phase space plot data
-#dir_path = "data/"
-dir_path = "../data"
+#dir_path = "../data"
+dir_path = os.path.dirname(path)
 
 ele = [file for file in os.listdir(dir_path) if file.startswith("e")]
 ion = [file for file in os.listdir(dir_path) if file.startswith("i")]
@@ -104,28 +101,59 @@ DATA_TS_phase = int(NUM_TS /t_phase) + 1
 
 k = int(DATA_TS/DATA_TS_phase) + 1
 
-fig, (ax_disp, ax_phase) = plt.subplots(2, 1, figsize=(10, 8))
+#fig, (ax_disp, ax_phase) = plt.subplots(2, 1, figsize=(10, 8))
+#fig, (ax_pot, ax_phase1,ax_phase2) = plt.subplots(3, 1, figsize=(10, 8))
+fig, (ax_pot, ax_den, ax_phase1, ax_phase2) = plt.subplots(4, 1, figsize=(10, 8))
 
 
 def update(frame):
     j = frame * k
-    ax_disp.clear()
-    ax_disp.plot(x[j], phi[j], label="potential")
-    ax_disp.legend()
-    ax_disp.set_title(f"Timestep: {frame * t_phase}")
+    ax_pot.clear()
+    ax_pot.plot(x[j], phi[j], color='black',label="potential")
+    #ax_pot.plot(x[j], EF[j], color='black',label="E_field")
+    #ax_pot.plot(x[j], ndi[j], color='red',label="ndi")
+    #ax_pot.plot(x[j], nde[j], color='cyan',label="nde")
+    ax_pot.set_xlabel("x")
+    ax_pot.set_ylabel("$\phi$")
+    ax_pot.legend()
+    ax_pot.set_title(f"Timestep: {j*write_interval}")
 
-    # Plot phase space plot
-    ax_phase.clear()
+    #density plots
+    ax_den.clear()
+    ax_den.plot(x[j], ndi[j], color='red',label="ndi")
+    ax_den.plot(x[j], nde[j], color='cyan',label="nde")
+    ax_den.set_xlabel("x")
+    ax_den.set_ylabel("$density$")
+    ax_den.legend()
+    
+    # Plot phase space plot for electron
+    ax_phase1.clear()
     with open(os.path.join(dir_path, ele[frame]), 'r') as f:
         data_ele = f.readlines()
     x_ele = [float(line.split()[0]) for line in data_ele]
     v_ele = [float(line.split()[1]) for line in data_ele]
-    ax_phase.scatter(x_ele, v_ele, s=1, label="electon")
-    ax_phase.legend()
-    #ax_phase.set_title(f"electron - Timestep: {frame * t_phase}")
+    ax_phase1.scatter(x_ele, v_ele, s=1,color = 'blue', label="electron")
+    ax_phase1.set_xlabel("x")
+    ax_phase1.set_ylabel("v")
+    ax_phase1.legend()
+   
     # Set common x-axis for both plots
-    ax_phase.set_xlim(ax_disp.get_xlim())
+    ax_phase1.set_xlim(ax_pot.get_xlim())
 
+    # Plot phase space plot for ion
+    ax_phase2.clear()
+    with open(os.path.join(dir_path, ion[frame]), 'r') as f:
+        data_ion = f.readlines()
+    x_ion = [float(line.split()[0]) for line in data_ion]
+    v_ion = [float(line.split()[1]) for line in data_ion]
+    ax_phase2.scatter(x_ion, v_ion, s=1,color= 'red',label="ion")
+    #ax_phase2.hist(v_ele, bins= 100,label= "velocity distribution")
+    ax_phase2.set_xlabel("x")
+    ax_phase2.set_ylabel("v")
+    ax_phase2.legend()
+   
+    # Set common x-axis for both plots
+    ax_phase2.set_xlim(ax_pot.get_xlim())
 
 ani = FuncAnimation(fig, update, frames=DATA_TS_phase, interval=50)
 # Save the animation as an MP4 file (1080p)
