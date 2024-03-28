@@ -115,8 +115,8 @@ The input file `input.ini` contains parameters for configuring the simulation. E
     ```
 
 ## Contributors
-- John Doe (@johndoe)
-- Jane Smith (@janesmith)
+- Rakesh Moulich
+- Kaushik Kalita
   
 
 
