@@ -36,15 +36,61 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
     g++ ./pic
     ```
 
-### Input Configuration (input.ini)
-The `input.ini` file contains parameters for configuring the simulation. Parameters include:
-- **Simulation duration**
-- **Number of particles**
-- **Grid size**
-- **Time step**
-- **Initial conditions**
+# Explanation of input.ini file Parameters
 
-Refer to the comments in the `input.ini` file for detailed information on each parameter.
+The input file `input.ini` contains parameters for configuring the simulation. Each section corresponds to a different aspect of the simulation setup.
+
+## `[file]`
+
+- **output**: Specifies the directory where the output data will be stored.
+
+## `[time]`
+
+- **NUM_TS**: Total number of time steps for the simulation.
+
+## `[diagnostics]`
+
+- **write_interval**: Interval for writing density and field data in result.txt file.
+- **write_interval_phase**: Interval for writing phase-space data file.
+- **write_diagnostics**: Interval for writing diagnostic outputs.
+- **DT_coeff**: Coefficient for the time step.
+- **write_flag**: Flag for controlling data writing: 
+  - 1: Write both phase and field data.
+  - 2: Write only field data.
+  - 3: Write only phase data.
+  - 0: Write no data.
+
+## `[domain]`
+
+- **NC**: Number of cells in the domain.
+- **x0**: Initial position of the domain.
+
+## `[population]`
+
+- **nParticlesE**: Number of electrons loaded into the domain.
+- **nParticlesI**: Number of ions loaded into the domain.
+- **nParticlesN**: Number of negative ions loaded into the domain.
+- **nParticlesB**: Number of background particles.
+- **tempE**: Temperature of electrons.
+- **tempI**: Temperature of ions.
+- **tempN**: Temperature of negative ions.
+- **tempB**: Temperature of background particles.
+- **massE**: Mass of electrons.
+- **massI**: Mass of ions.
+- **massN**: Mass of negative ions.
+- **massB**: Mass of background particles.
+
+## `[simulation]`
+
+- **v_i**: Ion streaming velocity.
+- **v_e**: Electron streaming velocity.
+- **v_b**: Beam particle streaming velocity.
+- **v_n**: Negative ion streaming velocity.
+- **density**: Plasma density.
+- **alpha**: Fraction of negative ion to background positive ion
+- **beta**: fraction of negative beam to background negative ion 
+- **bc**: Boundary condition.
+
 
 
 ![dispersion](https://github.com/koushik9988/particle-in-cell/assets/55924787/5d278d78-2755-4293-bf18-4f8a09789b8c)
