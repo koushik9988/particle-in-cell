@@ -1,1 +1,1 @@
-#1D Electrostatic Particle in cell code
+# 1D Electrostatic Particle in cell code
