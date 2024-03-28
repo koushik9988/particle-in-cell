@@ -26,6 +26,8 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 3. Build the code using make:
     ```bash
     make clean
+    ```
+    ```bash
     make all
     ```
 
