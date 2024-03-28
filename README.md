@@ -110,7 +110,6 @@ The input file `input.ini` contains parameters for configuring the simulation. E
     python3 dispersion_npz_EF.py ../name_of_outputfolder/files/
     ```
  3. Plot phase-space and potential data
-    Compress the result.txt file
      ```bash
     python3 plot.py ../name_of_outputfolder/files/
     ```
