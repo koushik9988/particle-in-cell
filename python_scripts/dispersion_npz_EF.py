@@ -42,10 +42,10 @@ e = constants('elementary charge')
 print(eps0)
 
 EV_TO_K = 11604.52 
-tempE = 2 		     
-tempI = 0.5			
-tempN = 0.3
-tempB = 0.3 
+tempE = config.getfloat('population', 'tempE')  		     
+tempI = config.getfloat('population', 'tempI') 		
+tempN = config.getfloat('population', 'tempN') 
+tempB = config.getfloat('population', 'tempB') 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++
 NUM_TS = config.getint('time', 'NUM_TS') 
 write_interval = config.getint('diagnostics', 'write_interval') 
@@ -61,24 +61,27 @@ Te = tempE
 Ti = tempI
 Tn = tempN
 Tb = tempB
-mi = 40*AMU
-mn = 140*AMU
+mi = AMU*config.getint('population', 'massI') 
+#mi = 40*AMU
+mn = AMU*config.getint('population', 'massN') 
 #-------------------------------------------------------
-alp = 0
-f = 0
+alp = config.getfloat('simulation', 'alpha') 
+f = config.getfloat('simulation', 'beta') 
 #-----------------------------------------------------
 ni0 = n0
-ne0 = n0*((1-alp-f))
-nn0 = f*ni0  
-nb0 = alp*ni0
+ne0 = n0*((1-alp-f*alp))
+nn0 = alp*ni0  
+nb0 = f*ni0
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 DATA_TS = int(NUM_TS/write_interval) + 1
 
-LD = np.sqrt(eps0*kb*Te*EV_TO_K/(ne0*e**2)) # Characteristic Debye length
 
 LD = np.sqrt(eps0*kb*Te*EV_TO_K/(ne0*e**2)) # Characteristic Debye length
-print(LD)
 we = np.sqrt(ne0*e**2/(eps0*me)) # Total Plasma Frequency
+
+
+#LD = np.sqrt(eps0*kb*Ti*EV_TO_K/(ni0*e**2)) # Characteristic Debye length
+#we = np.sqrt(ni0*e**2/(eps0*mi)) # Total Plasma Frequency
 
 DT = DT_coeff*(1.0/we)
 #++++++++++++++++++++ UNPACK ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -87,8 +90,8 @@ if os.path.exists(pjoin(path,file_name)):
     x = data['x']
     nde = data['nde']
     ndi = data['ndi']
-    ndn = data['ndn']
-    ndb = data['ndb']
+    #ndn = data['ndn']
+    #ndb = data['ndb']
     phi = data['phi']
     EF = data['EF']
 else:
@@ -111,6 +114,7 @@ is in the second row and so on. Similar is the case for writing and reshaping x.
 w_pe*t = NUM_TS*DT
 """
 EF = EF.reshape(DATA_TS,(NC+1))
+#nde = nde.reshape(DATA_TS,(NC+1))
 
 print("The shape of EF is: ", EF.shape)
 print("The shape of ndeh is: ", nde.shape)
@@ -119,11 +123,14 @@ wpet_1 = 0 #1000
 wpet_2 = NUM_TS*DT_coeff
 y1 = wpet_1/(DT_coeff*write_interval)
 y2 = wpet_2/(DT_coeff*write_interval)
-E = EF[int(y1):int(y2),:]
 
-print("The shape of E (reduced EF) is: ", E.shape)
+E = EF[int(y1):int(y2),:]
+#nde = nde[int(y1):int(y2),:]
+
+#print("The shape of E (reduced EF) is: ", E.shape)
 #+++++++++++++++++++++++++ FFT of E-field data ++++++++++++++++++++++++++++++++
 F = np.fft.fftn(E, norm='ortho')
+#F = np.fft.fftn(nde, norm='ortho')
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Define Omega and K
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -156,6 +163,7 @@ if raw_analytic:
 F_real = np.real(F)
 F_imag = np.imag(F)
 Z = np.log(np.abs(F))
+#Z = np.abs(F)
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 figsize = np.array([80,80/1.618]) #Figure size in mm (FOR SINGLE FIGURE)
@@ -174,9 +182,9 @@ mp.rc('legend', fontsize=10)
 
 #fig,ax = plt.subplots(figsize=figsize/25.4,constrained_layout=True,dpi=ppi)
 fig, ax = plt.subplots()
-c1 = plt.pcolor(K, Omega, Z,cmap='rainbow',shading='auto',vmin=np.min(Z),vmax=np.max(Z))##
-#c1 = plt.pcolor(K, Omega, Z,cmap='rainbow',shading='auto',vmin=-5,vmax=5)
-#c1 = plt.contourf(K, Omega, Z, cmap='rainbow',shading='auto',vmin=np.min(Z),vmax=np.max(Z))
+#c1 = plt.pcolor(K, Omega, Z,cmap='rainbow',shading='auto',vmin=np.min(Z),vmax=np.max(Z))##
+#c1 = plt.pcolor(K, Omega, Z,cmap='coolwarm',shading='auto',vmin=-6,vmax=6)
+c1 = plt.contourf(K, Omega, Z, cmap='rainbow',shading='auto',vmin=np.min(Z),vmax=np.max(Z))
 #c2 = plt.contourf(K, Omega, z, cmap='rainbow',shading='auto',vmin=np.min(z),vmax=np.max(z))
 #plt.contourf(K, Omega, f, cmap='rainbow',shading='auto',vmin=np.min(f),vmax=np.max(f))
 #c2 = plt.contour(x*LD,y/we,z , color ='r') ##

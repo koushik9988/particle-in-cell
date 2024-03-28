@@ -9,12 +9,13 @@ e = constants('elementary charge')
 eps = constants('electric constant')
 # --------------------------------------------------------------------------------------------
 def symbolic_coeffs():
-    w, k, v10, v20, ve0, vth1, vth2, vthe, w1, w2, we, wn = symbols('w, k, v10, v20, ve0, vth1, vth2, vthe, w1, w2, we, wn')
+    w, k, vb0, vi0, ve0, vthb, vthi, vthe, vthn, wb, wi, we, wn = symbols('w, k, vb0, vi0, ve0, vthb, vthi, vthe, vthn, wb, wi, we, wn')
     
-    A = ((w - k*v10)**2) - (k**2)*(vth1**2)
-    B = ((w - k*v20)**2) - (k**2)*(vth2**2)
+    A = ((w - k*vb0)**2) - (k**2)*(vthb**2)
+    B = ((w - k*vi0)**2) - (k**2)*(vthi**2)
     C = ((w - k*ve0)**2) - (k**2)*(vthe**2)
-    expr =  A*B*C*w**2 - (B*C*w1**2)*(w**2) - (A*C*w2**2)*(w**2) - (A*B*we**2)*(w**2) - (A*B*C)*(wn**2)
+    D = (k**2)*vthn**2
+    expr =  A*B*C*(w**2-D) - (B*C*wb**2)*(w**2-D) - (A*C*wi**2)*(w**2-D) - (A*B*we**2)*(w**2-D) - (A*B*C)*(wn**2)
     p = Poly(expr, w)
     coff = p.all_coeffs()    
     return coff
@@ -24,40 +25,46 @@ coff = symbolic_coeffs()
 print('Highest power of omega is: %d\n'%(len(coff)-1))
 # --------------------------------------------------------------------------------------------
 # Define the densities
-np10 = 0.1E13 # Beam 
-np20 = 0.9E13 # background ion
-ne0 = 0.5E13
-nn0 = 0.5E13
+alpha = 0.4
+beta = 0.1
+ni0 = 1E13
+ne0 = ni0*(1-alpha- alpha*beta)
+nn0 = alpha*ni0
+nb0 = beta*nn0
 #---------------------------------------------------------------------------------------------
 # Define masses 
-m1  = 40*AMU
-m2 = 2*AMU
+mi  = 1*AMU
+mb = 1*AMU
 me = constants('electron mass')
-mn  = 140*AMU 
+mn  = 1*AMU 
 # -------------------------------------------------------------------------------------------
 # Define Species Temperatures
-T1 = 0.1*e
-T2 = 0.1*e
+Tn = 0.1*e
+Tb = 0.1*e
+Ti = 0.1*e
 Te = 1*e
 # Define the polytropic coefficient
-g1 = 1
-g2 = 1
+gn = 1
+gb = 1
+gi = 1
 ge = 1
 # --------------------------------------------------------------------------------------------
 # Define the Thermal Velocities
-vth1 = np.sqrt(g1*T1/m1) #1E3
-vth2 = np.sqrt(g2*T2/m2)
+vthb = np.sqrt(gb*Tb/mb) #1E3
+vthn = np.sqrt(gn*Tn/mn)
+vthi = np.sqrt(gi*Ti/mi)
 vthe = np.sqrt(ge*Te/me) #1E4
-print(vth1, vthe)
+print(vthi, vthe)
 #--------------------------------------------------------------------------------------------
 # Define the Drift Velocities
-v10 = 1E5
-v20 = 0
-ve0 = 1E6
+vi0 = 0
+vn0 = 0
+ve0 = 0
+vb0 = -vthe*5
 k = np.arange(0, 500, 0.01)
 # --------------------------------------------------------------------------------------------
-w1 = np.sqrt((np10*e**2)/(eps*m1))
-w2 = np.sqrt((np20*e**2)/(eps*m2))
+wi = np.sqrt((ni0*e**2)/(eps*mi))
+wb = np.sqrt((nb0*e**2)/(eps*mb))
 we = np.sqrt((ne0*e**2)/(eps*me))
 wn = np.sqrt((nn0*e**2)/(eps*mn))
 # --------------------------------------------------------------------------------------------
@@ -141,6 +148,7 @@ if solved_analytic:
     ax[0].grid(True)
     #ax[0].set_xlim([0, np.max(k)])
     ax[0].set_ylim([0, 2])
+    #ax[0].set_xlim([0, 3])
 
     ax[1].plot(k[1:], epim1/we, 'r.', markersize = 2.0)
     ax[1].plot(k[1:], epim2/we, 'g.', markersize = 2.0)

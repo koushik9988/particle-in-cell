@@ -24,15 +24,16 @@ if not os.path.exists(file_path):
 
 # Load the single file
 try:
-    x, nde, ndi, ndn, ndb, phi, EF = np.loadtxt(file_path, unpack=True)
-    #x, nde, ndi,phi, EF = np.loadtxt(file_path, unpack=True)
+    #x, nde, ndi, ndn, ndb, phi, EF = np.loadtxt(file_path, unpack=True)
+    x, nde, ndi,phi, EF = np.loadtxt(file_path, unpack=True)
 except ValueError as e:
     print(f"Error loading data from {file_path}: {e}")
     sys.exit(1)
 
 if all_data:
     pro_data = 'processed_results_all.npz'
-    np.savez_compressed(pjoin(data_dir, pro_data), x=x, nde=nde, ndi=ndi, ndn=ndn, ndb = ndb, phi=phi, EF=EF)
+    #np.savez_compressed(pjoin(data_dir, pro_data), x=x, nde=nde, ndi=ndi, ndn=ndn, ndb = ndb, phi=phi, EF=EF)
+    np.savez_compressed(pjoin(data_dir, pro_data), x=x, nde=nde, ndi=ndi, phi=phi, EF=EF)
 #else:
     #pro_data = 'processed_results_E.npz'
     #np.savez_compressed(pjoin(data_dir, pro_data), x=x, EF=EF)

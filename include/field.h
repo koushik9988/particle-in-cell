@@ -20,7 +20,7 @@ class FieldSolve
     //void solvepotspectral();//in future
     //void CalculateEfield(double *phi, double *ef);
     void CalculateEfield();
-
+    
     protected:
     Domain &domain;
 

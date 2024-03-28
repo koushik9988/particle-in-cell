@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <random>
+#include "output.h"
 
 class Species;
 
@@ -40,6 +41,8 @@ class Domain
     double v_n;
     double v_b;
     double alpha;
+
+    std::string bc;
     //constructor 
     Domain(double x0, double dx, int ni);
     //destructor 

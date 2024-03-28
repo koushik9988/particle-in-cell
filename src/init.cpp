@@ -39,9 +39,9 @@ Init::Init(Species &species, Domain &domain) : species(species),domain(domain)
         else if(species.name == "beam") 
         {
             x = domain.x0 + p * ((domain.xL) / species.numparticle);
-            //x = domain.x0 + (domain.xL)*rnd();
+            //x = 3*domain.xL/4;
             double v_thb = sqrt(2 * Const::K_b * species.temp * Const::EV_to_K / species.mass);
-            v = SampleVel(species) + domain.v_b*v_th;
+            v = SampleVel(species) + domain.v_b*v_thb;
             v = v/v_th;
         }
 

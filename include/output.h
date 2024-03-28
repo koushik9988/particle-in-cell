@@ -22,12 +22,14 @@ class Output
     void write_particle(int ts, Species& species);
     void write_data(int ts, std::vector<Species> &species_list);
     void write_ke(int ts,std::vector<Species> &species_list);
+    void write_test(int ts, int n, Species& species);
 
     private:
     std::filesystem::path outputfolder;
     Domain& domain;
     std::ofstream file_data;
     std::ofstream file_ke;
+    std::ofstream file_test;
 };
 
 namespace display

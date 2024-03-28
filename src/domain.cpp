@@ -35,14 +35,17 @@ Domain::~Domain()
 
 void Domain::display()
 {
-    std::cout<<"cell spacing :"<<dx<<std::endl;
-    std::cout<<"system lenght :"<<xL<<std::endl;
-    std::cout<<"grid points :"<<ni<<std::endl;
-    std::cout<<"debye lenght :"<<LD<<std::endl;
-    std::cout<<"plasma frequency :"<<wp<<std::endl;
-    std::cout<<"time step :"<<DT<<std::endl;
-    //std::cout<<"system lenght"<<xL<<endl;
-
+    display::print("cell spacing :",dx);
+    display::print("system lenght :",xL);
+    display::print("grid points :",ni);
+    display::print("debye lenght :",LD);
+    display::print("plasma frequency :",wp);
+    display::print("Time step:",DT);
+    display::print("boundary condition :",bc);
+    display::print("plasma density :",density);
+    display::print("electron thermal velocity  :",LD*wp,"m/s");
+    display::print("beam streaming velocity  :",v_b*LD*wp,"m/s");
+    display::print("gamma factor :",sqrt(1-(v_b*LD*wp/(3e8))*(v_b*LD*wp/(3e8))));
 }
 
 //set normalized parameter.
@@ -157,10 +160,9 @@ double Domain::ComputePE(Species &species)
     // calculate the un-normalized electric potential energy
     pe = 0.5*Const::EPS_0*(eft*eft);
     
-    // Calculate the total thermal energy of all the cold electrons
+    // Calculate the total thermal energy of all the electrons
     double Th = (tempE*Const::eV)*(species.spwt)*species.numparticle;
     // normalize the potential energy by the total thermal 
-    // energy of the cold electrons
     pe = pe/Th;
     return pe;
 }

@@ -50,6 +50,7 @@ class Species
     //declare member functions or methods
     void AddParticle(Particle part);
     void Push_species();
+    void Push_species_open();
     void update(int start, int end);
     void Push_species_parallel();
     void ScatterSpecies();

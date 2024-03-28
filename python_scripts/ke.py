@@ -37,7 +37,7 @@ eps0 = constants('electric constant')
 e = constants('elementary charge')
 me = constants('electron mass')
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-te = kee+kei+ken+keb# Total kinetic energy of the electrons
+te = kee + kei + ken + keb + pe# Total kinetic energy of the electrons
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 figsize = np.array([200,200/1.618]) #Figure size in mm (FOR SINGLE FIGURE)
 dpi = 1200                        #Print resolution
@@ -56,6 +56,7 @@ mp.rc('legend', fontsize=10)
 fig,ax = plt.subplots(2,2,figsize=figsize/25.4,constrained_layout=True,dpi=ppi)
 
 ax[0][0].plot(t,kee,'r',linestyle='-',linewidth=1.0,label='$KE_{E}$')
+#ax[0][0].plot(t,pe,'r',linestyle='-',linewidth=1.0,label='$KE_{E}$')
 ax[0][0].set_xlabel('$\omega_{pe}t$')
 ax[0][0].set_ylabel('$KE_{E}$')
 ax[0][0].legend(loc='upper right',framealpha=0.5)

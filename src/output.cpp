@@ -8,7 +8,7 @@ Output::Output(const std::filesystem::path& outputfolder, Domain& domain) :
     std::filesystem::create_directories(outputfolder / "files");
 
     //file_data.open(outputfolder / "files" / "results_" + std::to_string(domain.alpha) + ".txt");
-    file_data.open(outputfolder / "files" / ("Results.txt"));
+    file_data.open(outputfolder / "files" / ("result.txt"));
 
     if (!file_data.is_open()) {
         throw std::runtime_error("Error opening file_data");
@@ -18,6 +18,12 @@ Output::Output(const std::filesystem::path& outputfolder, Domain& domain) :
     file_ke.open(outputfolder / "files" / ("ke_" + std::to_string(domain.alpha) + ".txt"));
 
     if (!file_ke.is_open()) {
+        throw std::runtime_error("Error opening file_ke");
+    }
+
+    file_test.open(outputfolder / "files" / ("density_fixed.txt"));
+
+    if (!file_test.is_open()) {
         throw std::runtime_error("Error opening file_ke");
     }
 }
@@ -69,20 +75,21 @@ void Output::write_data(int ts, std::vector<Species>& species_list)
     file_data << std::endl;  // Add an extra empty line at the end
 }
 
+
 void Output::write_ke(int ts,std::vector<Species> &species_list)
 {
     std::vector<Species>::iterator it;
 
     it = std::find_if(species_list.begin(),species_list.end(), [](Species &sp) { return sp.name == "electron";});
-    /*
-    Syntax
-    InputIterator find_if (InputIterator first, InputIterator last, UnaryPredicate pred);
-    Parameters:-
-    first, last: range which contains all the elements between first and last, including the element pointed by first but not the element pointed by last.
-    pred: Unary function that accepts an element in the range as an argument and returns a value in boolean.
-    Return Value
-    This function returns an iterator to the first element in the range [first, last) for which pred(function) returns true. If no such element is found, the function returns last.
-    */
+    
+    //Syntax
+    //InputIterator find_if (InputIterator first, InputIterator last, UnaryPredicate pred);
+    //Parameters:-
+    //first, last: range which contains all the elements between first and last, including the element pointed by first but not the element pointed by last.
+    //pred: Unary function that accepts an element in the range as an argument and returns a value in boolean.
+    //Return Value
+    //This function returns an iterator to the first element in the range [first, last) for which pred(function) returns true. If no such element is found, the function returns last.
+    
 
     if (it != species_list.end())
     {
@@ -104,3 +111,7 @@ void Output::write_ke(int ts,std::vector<Species> &species_list)
     }
 }
 
+void Output::write_test(int ts, int n, Species& species)
+{
+    file_test<<(ts*domain.DT)/domain.wp<<"\t"<<species.den[n]<<std::endl;
+}

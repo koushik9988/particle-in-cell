@@ -31,6 +31,7 @@ void FieldSolve::SolvePotDirect()
     for (int i=1; i<ni-1; i++)
         x[i]=-rho[i]*dx2;
 
+    //boundary conditions
     //x[0] = 0;
     //x[ni-1] = 0;
     x[0] = x[ni-1];
@@ -100,6 +101,7 @@ void FieldSolve::CalculateEfield()
 {
     double *phi = domain.phi;
     double *ef = domain.ef;
+    //std::string bc  = domain.bc;
     /*Apply central difference to the inner nodes*/
     for(int i=1; i<domain.ni-1; i++)
     {
@@ -108,8 +110,16 @@ void FieldSolve::CalculateEfield()
        
     /*for continous bounndary
     the point 0 and ni-1 is same */
-
-    ef[0] = -(phi[1]-phi[domain.ni-2])/(2*domain.dx);
-    ef[domain.ni-1] = ef[0];
+    if(domain.bc =="pbc")
+    {
+        ef[0] = -(phi[1]-phi[domain.ni-2])/(2*domain.dx);
+        ef[domain.ni-1] = ef[0];
+    }
+    else if(domain.bc == "open")
+    {
+        ef[0] = -(phi[1]-phi[0])/(domain.dx);
+        ef[domain.ni-1] = -(phi[domain.ni-1]-phi[domain.ni-2])/(domain.dx);
+    }
+    
     
 }
