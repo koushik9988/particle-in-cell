@@ -36,6 +36,8 @@ class Output
     //void write_ke(int ts,std::vector<Species> &species_list);
     void write_ke();
     void printmatrix(int row, int col, double **matrix);
+    void write_metadata(int NC, int NUM_TS, int write_int, int write_int_phase, double DT, int nE, int nI, int nN, int nB,
+     double Te, double Tm, double Tb, double alpha, double beta, double mI, double mN, double mB, double density);
     
     double **store_ke;
     int sp_no ;//= species_list.size();
@@ -47,6 +49,7 @@ class Output
     H5File file; // Declare H5::H5File object to handle HDF5 file operations
     Group field_data_group;
     Group time_group;
+    Group metadata_group;
     //std::vector<Species> species_list;
    
 };

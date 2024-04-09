@@ -23,6 +23,8 @@ Output::Output(const std::filesystem::path& outputfolder, Domain& domain) : outp
     //particle_group2 = file.createGroup("/ion");
     field_data_group = file.createGroup("/fielddata");
     time_group = file.createGroup("/time_var");
+    metadata_group = file.createGroup("/metadata");
+
 
     
     //-----------
@@ -45,6 +47,35 @@ Output::Output(const std::filesystem::path& outputfolder, Domain& domain) : outp
     //--------------------------------
 }
 
+//-------
+void Output::write_metadata(int NC, int NUM_TS, int write_int, int write_int_phase, double DT, int nE, int nI, int nN, int nB, double Te, double Tm, double Tb, double alpha, double beta, double mI, double mN, double mB, double density)
+{
+    // Write metadata attributes within the metadata group
+    //Group metadata_group = file.openGroup("/metadata");
+
+    metadata_group.createAttribute("NC", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &NC);
+    metadata_group.createAttribute("NUM_TS", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &NUM_TS);
+    metadata_group.createAttribute("write_int", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &write_int);
+    metadata_group.createAttribute("write_int_phase", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &write_int_phase);
+    metadata_group.createAttribute("DT_coeff", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &DT);
+    metadata_group.createAttribute("nE", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &nE);
+    metadata_group.createAttribute("nI", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &nI);
+    metadata_group.createAttribute("nN", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &nN);
+    metadata_group.createAttribute("nB", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &nB);
+    metadata_group.createAttribute("Te", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &Te);
+    metadata_group.createAttribute("Tm", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &Tm);
+    metadata_group.createAttribute("Tb", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &Tb);
+    metadata_group.createAttribute("alpha", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &alpha);
+    metadata_group.createAttribute("beta", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &beta);
+    metadata_group.createAttribute("mI", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &mI);
+    metadata_group.createAttribute("mN", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &mN);
+    metadata_group.createAttribute("mB", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &mB);
+    metadata_group.createAttribute("density", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &density);
+
+    metadata_group.close();
+}
+
+//---------
 
 void Output::write_field_data(int ts)
 {

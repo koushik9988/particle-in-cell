@@ -110,6 +110,9 @@ int main()
     //species_list.emplace_back("beam", massB, -Const::QE, beam_spwt, tempB, nB, domain);
 
 
+    output.write_metadata(NC,NUM_TS,write_interval,write_interval_phase,DT_coeff, nE, nI, nN, nB,
+     tempE, tempN, tempB, alpha, beta, massI, massN, massB,den);
+
     for(Species &p:species_list)
     {
          cout<< p.name << '\n' << p.mass<< '\n' << p.charge << '\n' << p.spwt << '\n' << p. numparticle <<'\n'<<p.charge_sig<<endl;
@@ -189,7 +192,7 @@ int main()
                 output.write_field_data(ts);
 
                 int k = ts/write_interval;
-                
+
                 output.store_ke[k][0] = ts * domain.DT;
                 //output.store_ke[int(index/write_interval)][0] = ts * domain.DT;
                 //display::print(k);
