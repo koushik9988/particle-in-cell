@@ -10,6 +10,7 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 - Python3
 - GNU C++ compiler(g++)
 - GNU make
+- [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
 - git
 - Matplotlib
 - NumPy
@@ -96,7 +97,7 @@ The input file `input.ini` contains parameters for configuring the simulation. E
 - **massB**: Mass of background particles.
 
 ## `[simulation]`
-
+- **number_of_species**: Number of species.
 - **v_i**: Ion streaming velocity.
 - **v_e**: Electron streaming velocity.
 - **v_b**: Beam particle streaming velocity.
@@ -109,18 +110,17 @@ The input file `input.ini` contains parameters for configuring the simulation. E
    - 2: open for open boundary condition.
 
  # Data processing and visualization
- 1. Compress the result.txt file
+ 1. Plot kinetic enegy ,potential enegy and total enegy
      ```bash
-    python3 data_process_npz.py ../name_of_outputfolder/files/ result.txt True
+    python3 ke_plot.py ../name_of_outputfolder
     ```
  2. Plot dispersion
-    Compress the result.txt file
      ```bash
-    python3 dispersion_npz_EF.py ../name_of_outputfolder/files/
+    python3 dispersion.py ../name_of_outputfolder
     ```
- 3. Plot phase-space and potential data
+ 3. Plot/Animate phase-space and potential data
      ```bash
-    python3 plot.py ../name_of_outputfolder/files/
+    python3 phase_pot_plot.py ../name_of_outputfolder
     ```
 
 ## Contributors
