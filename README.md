@@ -10,7 +10,7 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 - Python3
 - GNU C++ compiler(g++)
 - GNU make
-- hdf5
+- [hdf5](https://www.hdfgroup.org/solutions/hdf5/)
 - git
 - Matplotlib
 - NumPy
