@@ -35,7 +35,9 @@ class Output
     void write_field_data(int ts);
     //void write_ke(int ts,std::vector<Species> &species_list);
     void write_ke();
+    void storeKE_to_matrix(int ts, std::vector<Species> &species_list);
     void printmatrix(int row, int col, double **matrix);
+    void diagnostics(int ts, double max_phi, std::vector<Species> &species_list);
     void write_metadata(int NC, int NUM_TS, int write_int, int write_int_phase, double DT, int nE, int nI, int nN, int nB,
      double Te, double Tm, double Tb, double alpha, double beta, double mI, double mN, double mB, double density);
     

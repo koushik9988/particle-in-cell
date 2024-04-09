@@ -67,7 +67,8 @@ int main()
     //noramlizing quantity(electron)
     double LD = sqrt((Const::EPS_0*Const::K_b*tempE*Const::EV_to_K)/(ne0*Const::QE*Const::QE)); // Electron Debye Length    
     double wp = sqrt((ne0*Const::QE*Const::QE)/(massE*Const::EPS_0)); // Total Electron Plasma Frequency
-    double  CS = sqrt(tempE*Const::K_b*Const::EV_to_K/massI); // Ion acoustic speed
+    double wpi = sqrt((ni0*Const::QE*Const::QE)/(massI*Const::EPS_0)); //ion timescale
+    double CS = sqrt(tempE*Const::K_b*Const::EV_to_K/massI); // Ion acoustic speed
 
     print("ion-acosutic speed :", CS);
     print("debye lenght :", LD);
@@ -84,6 +85,7 @@ int main()
     print("normalized time step :",DT);
     double f = (wp / (2 * Const::PI));
     print("time period :",1.0/f);
+    print("ion scale :",1.0/(wpi/(2*Const::PI)));
     //print("time period 2 :",1.0/wp);
 
     Domain domain(x0,dx,ni);
@@ -106,8 +108,8 @@ int main()
     
     species_list.emplace_back("electron", massE,-Const::QE, electron_spwt, tempE, nE, domain);
     species_list.emplace_back("ion", massI, Const::QE, ion_spwt, tempI, nI, domain);
-    //species_list.emplace_back("negion", massN, -Const::QE, negion_spwt, tempN, nN, domain);
-    //species_list.emplace_back("beam", massB, -Const::QE, beam_spwt, tempB, nB, domain);
+    species_list.emplace_back("negion", massN, -Const::QE, negion_spwt, tempN, nN, domain);
+    species_list.emplace_back("beam", massB, -Const::QE, beam_spwt, tempB, nB, domain);
 
 
     output.write_metadata(NC,NUM_TS,write_interval,write_interval_phase,DT_coeff, nE, nI, nN, nB,
@@ -172,39 +174,18 @@ int main()
             }
             
 		}
-
-        //code testing
-        //output.write_test(ts,int(ni/2),species_list[0]);
     
         double max_phi = domain.phi[0];
         for(int i=0; i<domain.ni; i++)
             if (domain.phi[i]>max_phi) max_phi = domain.phi[i];
                 
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++
-        //~~~~~~~~~~~~~~~~~
-        
-        //~~~~~~~~~~~~~~~~~
         if(ts%write_interval== 0)
         {
             //int k = int(index/write_interval);
             if(write_flag == 1 || write_flag == 2 )
             {    
                 output.write_field_data(ts);
-
-                int k = ts/write_interval;
-
-                output.store_ke[k][0] = ts * domain.DT;
-                //output.store_ke[int(index/write_interval)][0] = ts * domain.DT;
-                //display::print(k);
-                int j = 1 ;
-                for (Species &sp : species_list)
-                {
-                    output.store_ke[k][j] = sp.Compute_KE(species_list[0]);
-                    j++;
-                    //cout<<output.store_ke[k][j]<<",";
-                }
-                //cout<<"\n";
-            
+                output.storeKE_to_matrix(ts,species_list);
                 for(Species &sp:species_list)
                 {
                     output.write_den_data(ts,sp);
@@ -225,37 +206,11 @@ int main()
         
         if(ts%write_diagnostics == 0)
         {
-            printf("TS: %i \t delta_phi: %.3g \t",ts, max_phi-domain.phi[0]);
-
-            for(Species &sp:species_list)
-            {
-                printf("n_%s:%i\t ", sp.name.c_str(), sp.part_list.size());
-            }
-
-            for(Species &sp:species_list)
-            {
-                printf("KE_%s:%.3g \t ", sp.name.c_str(), sp.Compute_KE(species_list[0]));
-            }
-
-            print("\n");
+            output.diagnostics(ts, max_phi,species_list);
         }  
-
-        //index++; 
     }
 
-    //index++; // Increment index here
-
-    /*
-    for(int i ; i <1000; i++)
-    {
-        for(int j = 0 ; j<3; j++)
-        {
-            cout<<output.store_ke[i][j]<<",";
-        }
-        cout<<"\n"<<endl;
-    }*/
-
-    output.printmatrix(1001,3,output.store_ke);
+    output.printmatrix(int(NUM_TS/write_interval) +1 ,species_list.size() + 1,output.store_ke);
 
     output.write_ke();
 

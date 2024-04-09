@@ -41,6 +41,7 @@ DT_coeff = config.getfloat('diagnostics', 'DT_coeff')
 DATA_TS = int(NUM_TS/write_interval) + 1
 write_interval_phase = config.getint('diagnostics', 'write_interval_phase')
 DATA_TS_PHASE = int(NUM_TS /write_interval_phase) + 1
+save_fig = config.getint('diagnostics', 'save_fig')
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -74,7 +75,7 @@ x = np.linspace(0,1025,1025)
 f = h5py.File(pjoin(path, file_name), 'r')
 #------------------------------------------
 
-fig, (ax_pot, ax_phase1, ax_phase2) = plt.subplots(3, 1, figsize=(10, 8))
+fig, (ax_pot, ax_phase1, ax_phase2, ax_phase3, ax_phase4) = plt.subplots(5, 1, figsize=(10, 8))
 
 
 def animate(i):
@@ -90,7 +91,18 @@ def animate(i):
     
     dataix = data_phase_i[:,0]
     dataivx = data_phase_i[:,1]
+
+    data_phase_n = f["particle_negion/%d"%j]
     
+    datanx = data_phase_n[:,0]
+    datanvx = data_phase_n[:,1]
+
+    data_phase_b = f["particle_beam/%d"%j]
+    
+    databx = data_phase_b[:,0]
+    databvx = data_phase_b[:,1]
+
+
     ax_phase1.clear()
     ax_phase1.scatter(dataex,dataevx,marker='.',color='b',alpha=1.0,s=10, label = "electron phase space")
     ax_phase1.set_xlabel('$x$')
@@ -103,6 +115,18 @@ def animate(i):
     ax_phase2.set_ylabel('$v$')
     ax_phase2.legend(loc='upper right',framealpha=0.5)
 
+    ax_phase3.cla()
+    ax_phase3.scatter(datanx,datanvx,marker='.',color='g',alpha=1.0,s=10, label = "negative-ion phase space")
+    ax_phase3.set_xlabel('$x$')
+    ax_phase3.set_ylabel('$v$')
+    ax_phase3.legend(loc='upper right',framealpha=0.5)
+
+    ax_phase4.cla()
+    ax_phase4.scatter(databx,databvx,marker='.',color='y',alpha=1.0,s=10, label = "beam phase space")
+    ax_phase4.set_xlabel('$x$')
+    ax_phase4.set_ylabel('$v$')
+    ax_phase4.legend(loc='upper right',framealpha=0.5)
+
     ax_pot.clear()
     pot = f["fielddata/pot/%d"%j]
     #print(pot[:])
@@ -111,13 +135,13 @@ def animate(i):
     ax_pot.set_ylabel('$\phi$')
     ax_pot.legend(loc='upper right',framealpha=0.5)
 
-   
-    #plt.savefig(pjoin(path_fig, 'phase-pot_%d.png' % (j)), dpi=1200)
+    if(save_fig == 1):
+        if(i%1000 == 0):
+            plt.savefig(pjoin(path_fig, 'phase-pot_%d.png' % (j)), dpi=1200)
 
-    
-    return ax_phase1, ax_phase2 , ax_pot
+    return ax_phase1, ax_phase2 , ax_phase3, ax_phase4 ,ax_pot
 
 
-ani = animation.FuncAnimation(fig, animate, frames = DATA_TS_PHASE, blit= False, interval= 500, repeat=False)
+ani = animation.FuncAnimation(fig, animate, frames = DATA_TS_PHASE, blit= False, interval= 100, repeat=False)
 
 plt.show()

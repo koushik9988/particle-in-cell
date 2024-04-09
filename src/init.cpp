@@ -40,8 +40,8 @@ Init::Init(Species &species, Domain &domain) : species(species),domain(domain)
         {
             x = domain.x0 + p * ((domain.xL) / species.numparticle);
             //x = 3*domain.xL/4;
-            double v_thb = sqrt(2 * Const::K_b * species.temp * Const::EV_to_K / species.mass);
-            v = SampleVel(species) + domain.v_b*v_thb;
+            //double v_thb = sqrt(2 * Const::K_b * species.temp * Const::EV_to_K / species.mass);
+            v = SampleVel(species) + domain.v_b*v_th;
             v = v/v_th;
         }
 

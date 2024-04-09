@@ -230,7 +230,7 @@ void Output::write_ke()
 
     // Define the dimensions of the dataset
     hsize_t ny = int(domain.NUM_TS/domain.write_interval) + 1; //rows
-    hsize_t nx = 3; //column
+    hsize_t nx = hsize_t(domain.species_no + 1); //column
 
     hsize_t dims_energy[2] = {ny, nx}; // Assuming all rows have the same length
 
@@ -265,9 +265,41 @@ void Output::printmatrix(int row, int col, double **matrix)
     {
         for (int j = 0; j < col; ++j)
         {
-            std::cout << matrix[i][j] << "\t";
+            std::cout << matrix[i][j] <<"\t\t";
         }
         std::cout << std::endl;
     }
 }
 
+void Output::storeKE_to_matrix(int ts, std::vector<Species> &species_list)
+{
+    int k = ts/domain.write_interval;
+
+    store_ke[k][0] = ts * domain.DT;
+    //output.store_ke[int(index/write_interval)][0] = ts * domain.DT;
+    //display::print(k);
+    int j = 1 ;
+    for (Species &sp : species_list)
+    {
+        store_ke[k][j] = sp.Compute_KE(species_list[0]);
+        j++;
+        //cout<<output.store_ke[k][j]<<",";
+    }
+}
+
+void Output::diagnostics(int ts, double max_phi, std::vector<Species> &species_list)
+{
+    printf("TS: %i \t delta_phi: %.3g \t",ts, max_phi-domain.phi[0]);
+
+    for(Species &sp:species_list)
+    {
+        printf("n_%s:%i\t ", sp.name.c_str(), sp.part_list.size());
+    }
+
+    for(Species &sp:species_list)
+    {
+        printf("KE_%s:%.3g \t ", sp.name.c_str(), sp.Compute_KE(species_list[0]));
+    }
+
+    display::print("\n");
+}

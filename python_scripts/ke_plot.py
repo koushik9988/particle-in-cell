@@ -43,6 +43,8 @@ DATA_TS = int(NUM_TS/write_interval) + 1
 t_phase = config.getint('diagnostics', 'write_interval_phase')
 DATA_TS_phase = int(NUM_TS /t_phase) + 1
 
+save_fig = config.getint('diagnostics', 'save_fig')
+
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 n0 = config.getfloat('simulation', 'density')
@@ -83,6 +85,8 @@ data = f["time_var/kinetic_energy"]
 ts = data[:,0]
 kee = data[:,1]
 kei = data[:,2]
+ken = data[:,3]
+keb = data[:,4]
 #-------------------------------------------
 
 #-----potential-energy calculation----------
@@ -90,30 +94,19 @@ time_steps = sorted(map(int, f['fielddata/efield'].keys()))
 PE = np.zeros(len(time_steps))
 #print(time_steps)
 for i, time_step in enumerate(time_steps):
-#for i, time_step in enumerate(ts):
-        #time_step = int(time_step/0.05)
-        # Get the electric field data for the current time step
         EF_data = f['fielddata/efield/' + str(time_step)]
-        #print(len(EF_data))
         x = np.linspace(0,NC,len(EF_data))*LD
-        #print((x[1]-x[0])/LD)
-        # Integrate the square of the electric field over the spatial domain
         E_sq = (EF_data[:]** 2) * ((me*we**2*LD/e)**2) 
-        #print(E_sq)
         integral = intg.trapz(E_sq, x)
-        #print(integral)
-        # Calculate the potential energy
         PE[i] = 0.5 * eps0 * integral
-        #print(PE[i])
 
 
 THe = ((electron_spwt)*nParticlesE)*Te#*EV_TO_K*kb
-#print(THe)
-# Normalize the electric potential energy by the total cold electron energy 
+#print(THe)# Normalize the electric potential energy by the total cold electron energy 
 PE/= THe
 #-------------------------------------------
 
-fig, (ax1,ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(10, 8))
+fig, ((ax1, ax2, ax5),(ax6, ax3, ax4))= plt.subplots(2, 3, figsize=(10, 8))
 
 
 ax1.plot(ts, kee, label='$KE_{e}$')
@@ -128,21 +121,34 @@ ax2.set_ylabel('$KE_{i}$')
 ax2.grid(True)
 ax2.legend(loc='upper right',framealpha=0.5)
 
+ax5.plot(ts, ken, label="$KE_{n}$")
+ax5.set_xlabel('$\omega_{pe}t$')
+ax5.set_ylabel('$KE_{n}$')
+ax5.grid(True)
+ax5.legend(loc='upper right',framealpha=0.5)
+
+ax6.plot(ts, keb, label="$KE_{b}$")
+ax6.set_xlabel('$\omega_{pe}t$')
+ax6.set_ylabel('$KE_{b}$')
+ax6.grid(True)
+ax6.legend(loc='upper right',framealpha=0.5)
+
 ax3.plot(ts, PE, label="potential energy")
 ax3.set_xlabel('$\omega_{pe}t$')
 ax3.set_ylabel('$PE$')
 ax3.grid(True)
 ax3.legend(loc='upper right',framealpha=0.5)
 
-ax4.plot(ts, kei + kee + PE, label="Total Energy")
+ax4.plot(ts, kei + kee + keb + ken + PE, label="Total Energy")
 ax4.set_xlabel('$\omega_{pe}t$')
 ax4.set_ylabel('Total Energy')
 ax4.grid(True)
-ax4.set_ylim([min(kei + kee + PE) - 1.0, max(kei + kee + PE) + 1.0])
+ax4.set_ylim([min(kei + kee + keb + ken + PE) - 5.0, max(kei + kee + keb + ken + PE) + 5.0])
 ax4.legend(loc='upper right',framealpha=0.5)
 
 plt.tight_layout()
 
-plt.savefig(pjoin(path,'ke_pe.png'),dpi = 1200)
+if(save_fig == 1):
+     plt.savefig(pjoin(path,'ke_pe.png'),dpi = 1200)
 
 plt.show()
