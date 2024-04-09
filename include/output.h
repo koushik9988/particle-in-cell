@@ -11,6 +11,11 @@
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
+#include <map>
+
+#include "H5Cpp.h"
+
+using namespace H5;
 
 class Domain;
 class Species;
@@ -18,18 +23,32 @@ class Species;
 class Output 
 {
     public:
-    Output(const std::filesystem::path& outputfolder, Domain& domain);
-    void write_particle(int ts, Species& species);
-    void write_data(int ts, std::vector<Species> &species_list);
-    void write_ke(int ts,std::vector<Species> &species_list);
-    void write_test(int ts, int n, Species& species);
 
+    std::map<std::string, Group> particle_groups;
+    std::map<std::string, Group> den_subgroups;
+
+    Output(const std::filesystem::path& outputfolder, Domain& domain);
+    //~Output();
+    void write_particle_data(int ts, Species& species);
+    //void write_particle_data(H5::Group& group, int ts, Species& species);
+    void write_den_data(int ts,  Species& species);
+    void write_field_data(int ts);
+    //void write_ke(int ts,std::vector<Species> &species_list);
+    void write_ke();
+    void printmatrix(int row, int col, double **matrix);
+    
+    double **store_ke;
+    int sp_no ;//= species_list.size();
+    int t_step;// = int(domain.NUM_TS/domain.write_interval) + 1 ;
     private:
+    //Species &species;
     std::filesystem::path outputfolder;
     Domain& domain;
-    std::ofstream file_data;
-    std::ofstream file_ke;
-    std::ofstream file_test;
+    H5File file; // Declare H5::H5File object to handle HDF5 file operations
+    Group field_data_group;
+    Group time_group;
+    //std::vector<Species> species_list;
+   
 };
 
 namespace display
@@ -46,6 +65,7 @@ namespace display
         std::cout << value;
         print(std::forward<Args>(args)...); // Recursive call with the remaining arguments
     }
+
 }
 
 #endif

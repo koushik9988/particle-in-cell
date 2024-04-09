@@ -53,16 +53,19 @@ void Domain:: set_normparam(double LD, double wp)
 {
     this->LD = LD;
     this->wp = wp;
+    
 }
 
 //set time.
-void Domain::set_time(double DT)
+void Domain::set_time(double DT, int NUM_TS, int write_interval)
 {
     this->DT = DT;
+    this->NUM_TS = NUM_TS;
+    this->write_interval = write_interval;
 }
 
 // set differetnt simulation parameter.
-void Domain::set_simparam(double tempE, double tempI, double tempN, double tempB, double density, double v_e, double v_i, double v_n, double v_b, double alpha)
+void Domain::set_simparam(double tempE, double tempI, double tempN, double tempB, double density, double v_e, double v_i, double v_n, double v_b, double alpha, int species_no)
 {
     this->tempE = tempE;
     this->tempI = tempI;
@@ -74,6 +77,7 @@ void Domain::set_simparam(double tempE, double tempI, double tempN, double tempB
     this->v_n = v_n;
     this->v_b = v_b;
     this->alpha = alpha;
+    this->species_no = species_no;
 }
 
 

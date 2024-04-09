@@ -55,6 +55,7 @@ int main()
     double massN = INIParser::getDouble(iniData["population"], "massN");
     massN = Const::AMU*massN;
     double den = INIParser::getDouble(iniData["simulation"],"density");
+    double species_no = INIParser::getInt(iniData["simulation"],"number_of_species");
     std:: string bc = INIParser::getString(iniData["simulation"],"bc");
     
     //normalized density 
@@ -89,8 +90,8 @@ int main()
 
     domain.bc  = bc;
     domain.set_normparam(LD,wp);
-    domain.set_simparam(tempE, tempI, tempN,tempB, den, v_e, v_i, v_n, v_b, alpha);
-    domain.set_time(DT);
+    domain.set_simparam(tempE, tempI, tempN,tempB, den, v_e, v_i, v_n, v_b, alpha,species_no);
+    domain.set_time(DT,NUM_TS,write_interval);
 
     domain.display();
 
@@ -139,6 +140,8 @@ int main()
         sp.Rewind_species();
     }
 
+    //int index = 0;
+
     //--------------MAIN LOOP----------------------- 
     for(int ts = 0 ; ts < NUM_TS + 1; ts++)
     {
@@ -168,31 +171,55 @@ int main()
 		}
 
         //code testing
-        output.write_test(ts,int(ni/2),species_list[0]);
+        //output.write_test(ts,int(ni/2),species_list[0]);
     
         double max_phi = domain.phi[0];
         for(int i=0; i<domain.ni; i++)
             if (domain.phi[i]>max_phi) max_phi = domain.phi[i];
                 
-        /*print diagnostics to the screen*/
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++
+        //~~~~~~~~~~~~~~~~~
+        
+        //~~~~~~~~~~~~~~~~~
         if(ts%write_interval== 0)
         {
+            //int k = int(index/write_interval);
             if(write_flag == 1 || write_flag == 2 )
             {    
-                output.write_data(ts,species_list);
-                output.write_ke(ts,species_list);  
+                output.write_field_data(ts);
+
+                int k = ts/write_interval;
+                
+                output.store_ke[k][0] = ts * domain.DT;
+                //output.store_ke[int(index/write_interval)][0] = ts * domain.DT;
+                //display::print(k);
+                int j = 1 ;
+                for (Species &sp : species_list)
+                {
+                    output.store_ke[k][j] = sp.Compute_KE(species_list[0]);
+                    j++;
+                    //cout<<output.store_ke[k][j]<<",";
+                }
+                //cout<<"\n";
+            
+                for(Species &sp:species_list)
+                {
+                    output.write_den_data(ts,sp);
+                }    
             }
         }
+        
         if(ts%write_interval_phase == 0)
         {
             if(write_flag == 1 || write_flag == 3)
             {
                 for(Species &sp:species_list)
                 {
-                    output.write_particle(ts,sp);
+                    output.write_particle_data(ts,sp);
                 }
             }
         }
+        
         if(ts%write_diagnostics == 0)
         {
             printf("TS: %i \t delta_phi: %.3g \t",ts, max_phi-domain.phi[0]);
@@ -208,8 +235,26 @@ int main()
             }
 
             print("\n");
-        }    
+        }  
+
+        //index++; 
     }
+
+    //index++; // Increment index here
+
+    /*
+    for(int i ; i <1000; i++)
+    {
+        for(int j = 0 ; j<3; j++)
+        {
+            cout<<output.store_ke[i][j]<<",";
+        }
+        cout<<"\n"<<endl;
+    }*/
+
+    output.printmatrix(1001,3,output.store_ke);
+
+    output.write_ke();
 
     auto end_time = std::chrono::high_resolution_clock::now();
 

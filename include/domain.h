@@ -20,6 +20,8 @@ class Domain
     double dx; //cell spacing
     int cell_no; // no of cell
     int ni; //no of grid points
+    int NUM_TS;
+    int write_interval;
     //double LD;
 
     //data structures to hold data
@@ -41,7 +43,9 @@ class Domain
     double v_n;
     double v_b;
     double alpha;
+    int species_no;
 
+    
     std::string bc;
     //constructor 
     Domain(double x0, double dx, int ni);
@@ -51,8 +55,8 @@ class Domain
     void display();
 
     void set_normparam(double LD, double wp);
-    void set_time(double DT);
-    void set_simparam(double tempE, double tempI, double tempN, double tempB, double density, double v_e, double v_i, double v_n, double v_b, double alpha);
+    void set_time(double DT, int NUM_TS, int write_interval);
+    void set_simparam(double tempE, double tempI, double tempN, double tempB, double density, double v_e, double v_i, double v_n, double v_b, double alpha,int species_no);
     /*here we use address of element in the vector container using address we can make changes in the original element 
     here vector<Species> is like kind of int,float etc data type. species is a kind of list/array which elements is different species 
     such as ion,electron and neutral etc.*/
@@ -92,6 +96,7 @@ class Rnd {
 public:
 	//constructor: set initial random seed and distribution limits
 	Rnd(): mt_gen{std::random_device()()}, rnd_dist{0,1.0} {}
+    //Rnd(): mt_gen{20}, rnd_dist{0,1.0} {}
 	double operator() () {return rnd_dist(mt_gen);}
 
 protected:

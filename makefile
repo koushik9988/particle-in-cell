@@ -4,6 +4,16 @@ TARGET = pic
 # Location of header files relative of makefile location.
 INCLUDE_DIR = include
 
+# Include directories
+INCLUDES = -I/usr/include/hdf5/serial/
+
+# Library directories
+LIB_DIRS = -L/usr/lib/x86_64-linux-gnu/hdf5/serial/
+
+# Libraries to link
+LIBS = -lhdf5 -lhdf5_cpp
+FFLAGS = -lfftw3 -lm
+
 # Location of source files relative to makefile location.
 SRC_DIR = src
 
@@ -19,13 +29,13 @@ all: $(TARGET)
 
 # Rule to build the executable
 $(TARGET): $(OBJS)
-	@echo "linking object file to make executable..."
-	$(CC) -o $@ $^
+	@echo "linking object file to make $(TARGET)"
+	$(CC) $(CFLAGS) $(LIB_DIRS) -o $(TARGET) $(OBJS) $(LIBS) $(FFLAGS)
 #rm -f $(OBJS)  
 
 # Rule to build object files from source files
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) $(CFLAGS) -c -o $@ $<  
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<  
 
 # Rule to clean up object files and executable
 clean:
