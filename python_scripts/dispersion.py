@@ -9,78 +9,59 @@ import configparser
 import h5py
 
 
-script_path = os.path.dirname(os.path.realpath(__file__))
-
-# Construct the path to the input.ini file
-config_path = pjoin(script_path, '..', 'input.ini')
-
-# Read the configuration file
-config = configparser.ConfigParser()
-config.read(config_path)
-
 file_name = 'result.h5'
-
-#path = './'
 path = sys.argv[1]
-# ------------------ Comments -------------------------------------------------
-# input parameters specific file
-# path to the data folder is ../data/data002_vd_20/files for vd=20
-# path to the data folder is ../data/data001_vd_80/files for vd=80
-#------------------------------------------------------------------------------
-# Constants
+
+#----------------Read hdf5 file ------------
+f = h5py.File(pjoin(path, file_name), 'r')
+metadata_group = f['/metadata']
+
+
 eps0 = constants('electric constant')
 kb = constants('Boltzmann constant')
 me = constants('electron mass')
 AMU = constants('atomic mass constant')
 e = constants('elementary charge')
-print(eps0)
 
+# Read attributes from hdf5 file 
+NC = metadata_group.attrs['NC']
+NUM_TS = metadata_group.attrs['NUM_TS']
+write_interval  = metadata_group.attrs['write_int']
+write_interval_phase = metadata_group.attrs['write_int_phase']
+DT_coeff = metadata_group.attrs['DT_coeff']
+nParticlesE = metadata_group.attrs['nE']
+nParticlesI = metadata_group.attrs['nI']
+nnParticlesN = metadata_group.attrs['nN']
+nnParticlesB = metadata_group.attrs['nB']
+Te = metadata_group.attrs['Te']
+Ti = metadata_group.attrs['Ti']
+Tb = metadata_group.attrs['Tb']
+Tn = metadata_group.attrs['Tn']
+alp = metadata_group.attrs['alpha']
+beta = metadata_group.attrs['beta']
+mi = metadata_group.attrs['mI']
+mn = metadata_group.attrs['mN']
+mb = metadata_group.attrs['mB']
+n0 = metadata_group.attrs['density']
+save_fig = metadata_group.attrs['save_fig']
 EV_TO_K = 11604.52 
-tempE = config.getfloat('population', 'tempE')  		     
-tempI = config.getfloat('population', 'tempI') 		
-tempN = config.getfloat('population', 'tempN') 
-tempB = config.getfloat('population', 'tempB') 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++
-NUM_TS = config.getint('time', 'NUM_TS') 
-write_interval = config.getint('diagnostics', 'write_interval') 
-DT_coeff = config.getfloat('diagnostics', 'DT_coeff') 
-#------------------------------------------------------
-# SIM Vars
-NC = config.getint('domain','NC') 
-Time = 0
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#vd = int(input('Enter vd:'))
-n0 = 1E13
-Te = tempE
-Ti = tempI
-Tn = tempN
-Tb = tempB
-mi = AMU*config.getint('population', 'massI') 
-#mi = 40*AMU
-mn = AMU*config.getint('population', 'massN') 
-#-------------------------------------------------------
-alp = config.getfloat('simulation', 'alpha') 
-f = config.getfloat('simulation', 'beta') 
-#-----------------------------------------------------
-ni0 = n0
-ne0 = n0*((1-alp-f*alp))
-nn0 = alp*ni0  
-nb0 = f*ni0
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 DATA_TS = int(NUM_TS/write_interval) + 1
 
+#-------------------plasma frequenct and debye lenght calculation---------------------------
+ni0 = n0
+ne0 = n0*((1-alp-beta*alp))
+nn0 = alp*ni0  
+nb0 = beta*ni0
 
 LD = np.sqrt(eps0*kb*Te*EV_TO_K/(ne0*e**2)) # Characteristic Debye length
 we = np.sqrt(ne0*e**2/(eps0*me)) # Total Plasma Frequency
-
-
 DT = DT_coeff*(1.0/we)
 
-#----------------Read hdf5 file ------------
+#----------------------------------------------------------------------------------
+
+#transform elctric field data into a 2D array
+
 electric_field_data = []
-
-f = h5py.File(pjoin(path, file_name), 'r')
-
 time_steps = sorted(map(int, f['fielddata/efield'].keys()))
 
 for i, time_step in enumerate(time_steps):
@@ -90,13 +71,12 @@ for i, time_step in enumerate(time_steps):
 # Combine electric field data into a 2D array
 EF = np.vstack(electric_field_data)
 
-x = np.linspace(0,NC,len(EF.shape[0]))
+x = np.linspace(0,NC, EF.shape[0])
 dx = x[1]-x[0]
-
 print("The shape of EF is: ", EF.shape)
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-wpet_1 = 0 #1000
+wpet_1 = 0
 wpet_2 = NUM_TS*DT_coeff
 y1 = wpet_1/(DT_coeff*write_interval)
 y2 = wpet_2/(DT_coeff*write_interval)
@@ -156,7 +136,7 @@ mp.rc('xtick', labelsize=10)
 mp.rc('ytick', labelsize=10)
 mp.rc('legend', fontsize=10)
 
-
+#-----------plotting --------------------------------------------------------
 
 #fig,ax = plt.subplots(figsize=figsize/25.4,constrained_layout=True,dpi=ppi)
 fig, ax = plt.subplots()

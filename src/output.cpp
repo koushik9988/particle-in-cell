@@ -48,7 +48,8 @@ Output::Output(const std::filesystem::path& outputfolder, Domain& domain) : outp
 }
 
 //-------
-void Output::write_metadata(int NC, int NUM_TS, int write_int, int write_int_phase, double DT, int nE, int nI, int nN, int nB, double Te, double Tm, double Tb, double alpha, double beta, double mI, double mN, double mB, double density)
+void Output::write_metadata(int NC, int NUM_TS, int write_int, int write_int_phase, double DT, int nE, int nI, int nN, int nB, double Te, double Ti, double Tb, double Tn, double alpha,
+ double beta, double mI, double mN, double mB, double density, int save_fig, double ve, double vi, double vn, double vb)
 {
     // Write metadata attributes within the metadata group
     //Group metadata_group = file.openGroup("/metadata");
@@ -63,14 +64,20 @@ void Output::write_metadata(int NC, int NUM_TS, int write_int, int write_int_pha
     metadata_group.createAttribute("nN", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &nN);
     metadata_group.createAttribute("nB", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_INT, &nB);
     metadata_group.createAttribute("Te", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &Te);
-    metadata_group.createAttribute("Tm", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &Tm);
+    metadata_group.createAttribute("Ti", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &Ti);
     metadata_group.createAttribute("Tb", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &Tb);
+    metadata_group.createAttribute("Tn", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &Tn);
     metadata_group.createAttribute("alpha", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &alpha);
     metadata_group.createAttribute("beta", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &beta);
     metadata_group.createAttribute("mI", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &mI);
     metadata_group.createAttribute("mN", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &mN);
     metadata_group.createAttribute("mB", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &mB);
     metadata_group.createAttribute("density", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &density);
+    metadata_group.createAttribute("save_fig", PredType::NATIVE_INT, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &save_fig);
+    metadata_group.createAttribute("ve", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &ve);
+    metadata_group.createAttribute("vi", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &vi);
+    metadata_group.createAttribute("vn", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &vn);
+    metadata_group.createAttribute("vb", PredType::NATIVE_DOUBLE, DataSpace(H5S_SCALAR)).write(PredType::NATIVE_DOUBLE, &vb);
 
     metadata_group.close();
 }
@@ -289,16 +296,16 @@ void Output::storeKE_to_matrix(int ts, std::vector<Species> &species_list)
 
 void Output::diagnostics(int ts, double max_phi, std::vector<Species> &species_list)
 {
-    printf("TS: %i \t delta_phi: %.3g \t",ts, max_phi-domain.phi[0]);
+    printf("TS: %i \t delta_phi: %.2g \t",ts, max_phi-domain.phi[0]);
 
     for(Species &sp:species_list)
     {
-        printf("n_%s:%i\t ", sp.name.c_str(), sp.part_list.size());
+        printf("n_%.4s:%i\t ", sp.name.c_str(), sp.part_list.size());
     }
 
     for(Species &sp:species_list)
     {
-        printf("KE_%s:%.3g \t ", sp.name.c_str(), sp.Compute_KE(species_list[0]));
+        printf("KE_%.4s:%.2g \t ", sp.name.c_str(), sp.Compute_KE(species_list[0]));
     }
 
     display::print("\n");

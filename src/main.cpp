@@ -31,6 +31,7 @@ int main()
     double v_n = INIParser::getDouble(iniData["simulation"], "v_n");
     int NUM_TS = INIParser::getInt(iniData["time"], "NUM_TS");
     double DT_coeff = INIParser::getDouble(iniData["diagnostics"],"DT_coeff");
+    int save_fig = INIParser::getDouble(iniData["diagnostics"],"save_fig");
     int write_interval = INIParser::getInt(iniData["diagnostics"],"write_interval");
     int write_interval_phase = INIParser::getInt(iniData["diagnostics"],"write_interval_phase");
     int write_diagnostics = INIParser::getInt(iniData["diagnostics"],"write_diagnostics");
@@ -113,7 +114,7 @@ int main()
 
 
     output.write_metadata(NC,NUM_TS,write_interval,write_interval_phase,DT_coeff, nE, nI, nN, nB,
-     tempE, tempN, tempB, alpha, beta, massI, massN, massB,den);
+     tempE,tempI,tempB, tempN, alpha, beta, massI, massN, massB,den,save_fig,v_e, v_i,v_n,v_b);
 
     for(Species &p:species_list)
     {
@@ -210,7 +211,7 @@ int main()
         }  
     }
 
-    output.printmatrix(int(NUM_TS/write_interval) +1 ,species_list.size() + 1,output.store_ke);
+    //output.printmatrix(int(NUM_TS/write_interval) +1 ,species_list.size() + 1,output.store_ke);
 
     output.write_ke();
 

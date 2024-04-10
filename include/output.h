@@ -38,9 +38,8 @@ class Output
     void storeKE_to_matrix(int ts, std::vector<Species> &species_list);
     void printmatrix(int row, int col, double **matrix);
     void diagnostics(int ts, double max_phi, std::vector<Species> &species_list);
-    void write_metadata(int NC, int NUM_TS, int write_int, int write_int_phase, double DT, int nE, int nI, int nN, int nB,
-     double Te, double Tm, double Tb, double alpha, double beta, double mI, double mN, double mB, double density);
-    
+    void write_metadata(int NC, int NUM_TS, int write_int, int write_int_phase, double DT, int nE, int nI, int nN, int nB, double Te, double Ti, double Tb, double Tn, double alpha,
+ double beta, double mI, double mN, double mB, double density, int save_fig, double ve, double vi, double vn, double vb);
     double **store_ke;
     int sp_no ;//= species_list.size();
     int t_step;// = int(domain.NUM_TS/domain.write_interval) + 1 ;

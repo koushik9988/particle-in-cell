@@ -11,12 +11,6 @@ import h5py
 import matplotlib.animation as animation
 import scipy.integrate as intg
 
-script_path = os.path.dirname(os.path.realpath(__file__))
-config_path = pjoin(script_path, '..', 'input.ini')
-
-# Read the configuration file
-config = configparser.ConfigParser()
-config.read(config_path)
 
 #hdf5 file name and path 
 file_name = 'result.h5'
@@ -29,46 +23,46 @@ path_fig = pjoin(path,path1)
 if not os.path.exists(path_fig):
     os.makedirs(path_fig)
 
-# Constants and data loading from input.ini file
+#----------------Read hdf5 file ------------
+f = h5py.File(pjoin(path, file_name), 'r')
+metadata_group = f['/metadata']
+
+# Constants and data loading from hdf5 file 
 eps0 = constants('electric constant')
 kb = constants('Boltzmann constant')
 me = constants('electron mass')
 AMU = constants('atomic mass constant')
 e = constants('elementary charge')
-NUM_TS = config.getint('time', 'NUM_TS') 
-write_interval = config.getint('diagnostics', 'write_interval') 
-phase = config.getint('diagnostics', 'write_interval_phase') 
-DT_coeff = config.getfloat('diagnostics', 'DT_coeff') 
-DATA_TS = int(NUM_TS/write_interval) + 1
-t_phase = config.getint('diagnostics', 'write_interval_phase')
-DATA_TS_phase = int(NUM_TS /t_phase) + 1
 
-save_fig = config.getint('diagnostics', 'save_fig')
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-n0 = config.getfloat('simulation', 'density')
-Te = e*config.getfloat('population', 'tempE')
-Ti = e*config.getfloat('population', 'tempI')
-Tn = e*config.getfloat('population', 'tempN')
-mi = AMU*config.getfloat('population', 'massI')
-mn = AMU*config.getfloat('population', 'massN')
-nParticlesE = config.getint('population', 'nParticlesE')
+# Read individual attributes
+NC = metadata_group.attrs['NC']
+NUM_TS = metadata_group.attrs['NUM_TS']
+write_interval  = metadata_group.attrs['write_int']
+write_interval_phase = metadata_group.attrs['write_int_phase']
+DT_coeff = metadata_group.attrs['DT_coeff']
+nParticlesE = metadata_group.attrs['nE']
+nParticlesI = metadata_group.attrs['nI']
+nnParticlesN = metadata_group.attrs['nN']
+nnParticlesB = metadata_group.attrs['nB']
+Te = e*metadata_group.attrs['Te']
+Ti = e*metadata_group.attrs['Ti']
+Tb = e*metadata_group.attrs['Tb']
+Tn = e*metadata_group.attrs['Tn']
+alp = metadata_group.attrs['alpha']
+beta = metadata_group.attrs['beta']
+mi = metadata_group.attrs['mI']
+mn = metadata_group.attrs['mN']
+mb = metadata_group.attrs['mB']
+n0 = metadata_group.attrs['density']
+save_fig = metadata_group.attrs['save_fig']
 EV_TO_K = 11604.52 
-#------------------------------------------------------
 
-#------------------------------------------------------
-# SIM Vars
-NC = config.getint('domain','NC') 
-Time = 0
 #-----------------------Debye lenght calculation--------
-alp = config.getfloat('simulation', 'alpha')
-f = config.getfloat('simulation', 'beta')
 ni0 = n0
-ne0 = n0*((1+alp-f))
+ne0 = n0*((1-alp-beta*beta))
 ni0 = n0
-nn0 = f*ni0  
-nb0 = alp*ni0
+nn0 = alp*ni0  
+nb0 = beta*ni0
 
 # Characteristic Debye length
 LD = np.sqrt(eps0*Te/(ne0*e**2)) 
@@ -76,18 +70,14 @@ electron_spwt = (ne0*NC*LD)/(nParticlesE)
 print(electron_spwt)
 we = np.sqrt(ne0*e**2/(eps0*me)) # Total Plasma Frequency
 #---------------------------------------------------------
-#x = np.linspace(0,1025,1025)
-
-#----------------Read hdf5 file ------------
-f = h5py.File(pjoin(path, file_name), 'r')
-
 data = f["time_var/kinetic_energy"]
+
 ts = data[:,0]
 kee = data[:,1]
 kei = data[:,2]
 ken = data[:,3]
 keb = data[:,4]
-#-------------------------------------------
+
 
 #-----potential-energy calculation----------
 time_steps = sorted(map(int, f['fielddata/efield'].keys()))
@@ -104,7 +94,7 @@ for i, time_step in enumerate(time_steps):
 THe = ((electron_spwt)*nParticlesE)*Te#*EV_TO_K*kb
 #print(THe)# Normalize the electric potential energy by the total cold electron energy 
 PE/= THe
-#-------------------------------------------
+#---------------plotting -------------------------
 
 fig, ((ax1, ax2, ax5),(ax6, ax3, ax4))= plt.subplots(2, 3, figsize=(10, 8))
 
