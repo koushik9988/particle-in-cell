@@ -11,6 +11,12 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 - GNU C++ compiler(g++)
 - GNU make
 - [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
+- ```bash
+    sudo apt update
+    ```
+  ```bash
+    sudo apt install libhdf5-dev
+    ```
 - git
 - Matplotlib
 - NumPy
