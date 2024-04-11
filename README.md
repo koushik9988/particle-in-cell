@@ -18,11 +18,11 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 
 
 ### Installation
-1.Install hdf5 on linux(Ubuntu based)
-  ```bash
+1. Install hdf5 on linux(Ubuntu based)
+   ```bash
     sudo apt update
     ```
-   ```bash
+    ```bash
     sudo apt install libhdf5-dev
     ```
 
