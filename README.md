@@ -116,7 +116,7 @@ The `input.ini` file contains parameters for configuring the simulation. Each se
   - `open`: Open boundary condition.
 - **see_rate**: Secondary electron emission rate.
 - **tempwall**: Temperature at the wall.
-- **ionfixed**: Flag for fixing ions.
+- **ionfixed**: Flag for fixed ions background.
 
 ## `[solver]`
 
