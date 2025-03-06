@@ -44,6 +44,7 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 ### Running the Code
 1. Configure the simulation parameters in the `input.ini` file.
 2. Run the code:
+The executble will be located in the build directory after building with cmake.
     ```bash
     ./ePIC++ ../inputfiles/input
     ```
