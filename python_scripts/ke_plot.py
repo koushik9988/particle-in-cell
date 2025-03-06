@@ -40,105 +40,89 @@ NUM_TS = metadata_group.attrs['NUM_TS']
 write_interval  = metadata_group.attrs['write_int']
 write_interval_phase = metadata_group.attrs['write_int_phase']
 DT_coeff = metadata_group.attrs['DT_coeff']
-nParticlesE = metadata_group.attrs['nE']
-nParticlesI = metadata_group.attrs['nI']
-nnParticlesN = metadata_group.attrs['nN']
-nnParticlesB = metadata_group.attrs['nB']
-Te = e*metadata_group.attrs['Te']
-Ti = e*metadata_group.attrs['Ti']
-Tb = e*metadata_group.attrs['Tb']
-Tn = e*metadata_group.attrs['Tn']
-alp = metadata_group.attrs['alpha']
-beta = metadata_group.attrs['beta']
-mi = metadata_group.attrs['mI']
-mn = metadata_group.attrs['mN']
-mb = metadata_group.attrs['mB']
+LD = metadata_group.attrs['LDe']
+LDi = metadata_group.attrs['LDi']
+wpe = metadata_group.attrs['wpe']
+wpi = metadata_group.attrs['wpi']
 n0 = metadata_group.attrs['density']
 save_fig = metadata_group.attrs['save_fig']
+normscheme = metadata_group.attrs['norm_scheme']
 EV_TO_K = 11604.52 
 
-#-----------------------Debye lenght calculation--------
-ni0 = n0
-ne0 = n0*((1-alp-beta*beta))
-ni0 = n0
-nn0 = alp*ni0  
-nb0 = beta*ni0
-
-# Characteristic Debye length
-LD = np.sqrt(eps0*Te/(ne0*e**2)) 
-electron_spwt = (ne0*NC*LD)/(nParticlesE)
-print(electron_spwt)
-we = np.sqrt(ne0*e**2/(eps0*me)) # Total Plasma Frequency
-#---------------------------------------------------------
 data = f["time_var/kinetic_energy"]
+
+mFactor = wpi/wpe
 
 ts = data[:,0]
 kee = data[:,1]
 kei = data[:,2]
 ken = data[:,3]
-keb = data[:,4]
+keb = data[:,3]
+PE = data[:,4]
 
 
-#-----potential-energy calculation----------
-time_steps = sorted(map(int, f['fielddata/efield'].keys()))
-PE = np.zeros(len(time_steps))
-#print(time_steps)
-for i, time_step in enumerate(time_steps):
-        EF_data = f['fielddata/efield/' + str(time_step)]
-        x = np.linspace(0,NC,len(EF_data))*LD
-        E_sq = (EF_data[:]** 2) * ((me*we**2*LD/e)**2) 
-        integral = intg.trapz(E_sq, x)
-        PE[i] = 0.5 * eps0 * integral
+if normscheme == 2 or normscheme == 4:
+    LD = LDi
+    ts *= mFactor
+if normscheme == 1 or normscheme == 3:
+    LD = LD
 
-
-THe = ((electron_spwt)*nParticlesE)*Te#*EV_TO_K*kb
-#print(THe)# Normalize the electric potential energy by the total cold electron energy 
-PE/= THe
 #---------------plotting -------------------------
+figsize = np.array([80,80/1.618]) #Figure size in mm (FOR SINGLE FIGURE)
+dpi = 1200                        #Print resolution
+ppi = np.sqrt(1920**2+1200**2)/24 #Screen resolution
 
-fig, ((ax1, ax2, ax5),(ax6, ax3, ax4))= plt.subplots(2, 3, figsize=(10, 8))
+mp.rc('text', usetex=False)
+mp.rc('font', family='sans-serif', size=10, serif='Computer Modern Roman')
+mp.rc('axes', titlesize=10)
+mp.rc('axes', labelsize=10)
+mp.rc('xtick', labelsize=10)
+mp.rc('ytick', labelsize=10)
+mp.rc('legend', fontsize=10)
 
+fig, ((ax1, ax2, ax5),(ax6, ax3, ax4))= plt.subplots(2, 3, figsize= figsize/10.4,constrained_layout=True,dpi=ppi)
 
 ax1.plot(ts, kee, label='$KE_{e}$')
-ax1.set_xlabel('$\omega_{pe}t$')
+ax1.set_xlabel('$\omega_{pi}t$')
 ax1.set_ylabel('$KE_{e}$')
 ax1.grid(True)
 ax1.legend(loc='upper right',framealpha=0.5)
 
 ax2.plot(ts, kei, label="$KE_{i}$")
-ax2.set_xlabel('$\omega_{pe}t$')
+ax2.set_xlabel('$\omega_{pi}t$')
 ax2.set_ylabel('$KE_{i}$')
 ax2.grid(True)
 ax2.legend(loc='upper right',framealpha=0.5)
 
 ax5.plot(ts, ken, label="$KE_{n}$")
-ax5.set_xlabel('$\omega_{pe}t$')
+ax5.set_xlabel('$\omega_{pi}t$')
 ax5.set_ylabel('$KE_{n}$')
 ax5.grid(True)
 ax5.legend(loc='upper right',framealpha=0.5)
 
-ax6.plot(ts, keb, label="$KE_{b}$")
-ax6.set_xlabel('$\omega_{pe}t$')
+ax6.plot(ts, keb , label="$KE_{b}$")
+ax6.set_xlabel('$\omega_{pi}t$')
 ax6.set_ylabel('$KE_{b}$')
 ax6.grid(True)
 ax6.legend(loc='upper right',framealpha=0.5)
 
 ax3.plot(ts, PE, label="potential energy")
-ax3.set_xlabel('$\omega_{pe}t$')
+ax3.set_xlabel('$\omega_{pi}t$')
 ax3.set_ylabel('$PE$')
 ax3.grid(True)
 ax3.legend(loc='upper right',framealpha=0.5)
 
-ax4.plot(ts, kei + kee + keb + ken + PE, label="Total Energy")
-ax4.set_xlabel('$\omega_{pe}t$')
+ax4.plot(ts, kei + kee  + ken + PE, label="Total Energy")
+ax4.set_xlabel('$\omega_{pi}t$')
 ax4.set_ylabel('Total Energy')
 ax4.grid(True)
-ax4.set_ylim([min(kei + kee + keb + ken + PE) - 5.0, max(kei + kee + keb + ken + PE) + 5.0])
+ax4.set_ylim([min(kei + kee + ken + PE) - 10, max(kei + kee  + ken + PE ) + 10])
 ax4.legend(loc='upper right',framealpha=0.5)
 
+#plt.semilogy()
 plt.tight_layout()
 
-if(save_fig == 1):
-     plt.savefig(pjoin(path,'ke_pe.png'),dpi = 1200)
+#if(save_fig == 1):
+plt.savefig(pjoin(path,'ke_pe.png'),dpi = dpi)
 
 plt.show()

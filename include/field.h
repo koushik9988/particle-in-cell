@@ -1,30 +1,37 @@
 #ifndef _FIELD_H_
 #define _FIELD_H_
 
-#include "domain.h"
 #include <cstring>
+#include "domain.h"
+#include "linalg.h"
+#include "function.h"
+#include "solvers.h"
 
-class Domain;
+class Domain; // Forward declaration of Domain class
 
 class FieldSolve
 {
-    public:
-    //constructor 
+public:
+    // Constructor
     FieldSolve(Domain &domain):domain(domain){};
-    
-    //void SolvePotDirect(double *x, double *rho);
-    void SolvePotDirect();
-    bool SolvePotIter();
-    //void solvepotiterative();
-    //void solvepotcg(); //in future
-    //void solvepotspectral();//in future
-    //void CalculateEfield(double *phi, double *ef);
-    void CalculateEfield();
-    
-    protected:
-    Domain &domain;
 
+    enum class SolverType
+    {
+        DIRECT,
+        PCG,
+        CG,
+        GS
+    };
+
+    void PotentialSolver(int ts);
+    void CalculateEfield();
+    void Direct(int ts);
+    void pcgsolver();
+    void cgsolver();
+    void GaussElim();
+
+private:
+    Domain &domain;
 };
 
-
-#endif
+#endif // _FIELD_H_

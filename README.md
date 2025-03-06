@@ -18,25 +18,17 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 
 
 ### Installation
-1. Install hdf5 on linux(Ubuntu based)
-   ```bash
-    sudo apt update
-    ```
-    ```bash
-    sudo apt install libhdf5-dev
-    ```
-
-2. Clone the repository:
+1. Clone the repository:
     ```bash
     git clone https://github.com/koushik9988/particle-in-cell.git
     ```
 
-3. Navigate to the directory:
+2. Navigate to the directory:
     ```bash
     cd your_repository
     ```
 
-4. Build the code using make:
+3. Build the code using make:
     ```bash
     make clean
     ```

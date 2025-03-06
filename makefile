@@ -1,44 +1,54 @@
-# Name of the executable
-TARGET = pic
+# Compiler and compiler flags
+CXX = g++
+CXXFLAGS =  -g -Wall -O2 -std=c++17 -I./include -I./linearalgebra -I/usr/include/hdf5/serial/ -I/usr/include/python3.10 
 
-# Location of header files relative of makefile location.
-INCLUDE_DIR = include
-
-# Include directories
-INCLUDES = -I/usr/include/hdf5/serial/
+# Directories
+SRCDIR = src
+OBJDIR = object
 
 # Library directories
 LIB_DIRS = -L/usr/lib/x86_64-linux-gnu/hdf5/serial/
+LIBS = -lhdf5 -lhdf5_cpp -lpthread -lpython3.10
 
-# Libraries to link
-LIBS = -lhdf5 -lhdf5_cpp
-FFLAGS = -lfftw3 -lm
+#LIB_DIRS = -L/usr/lib/x86_64-linux-gnu/hdf5/serial/ -L/usr/lib/x86_64-linux-gnu/ -L/usr/local/lib
+#LIBS = -lhdf5 -lhdf5_cpp -lpthread -lglut -lGLU -lGL
 
-# Location of source files relative to makefile location.
-SRC_DIR = src
+# Source files
+SOURCES := $(wildcard $(SRCDIR)/*.cpp)
 
-OBJS = $(SRC_DIR)/main.o $(SRC_DIR)/init.o $(SRC_DIR)/species.o $(SRC_DIR)/field.o $(SRC_DIR)/domain.o  $(SRC_DIR)/iniparser.o $(SRC_DIR)/output.o  # Add more as needed
+# Object files
+OBJECTS := $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
 
-# Compiler and C++ standard and optimization flags
-CC = g++
-#CC = clang
-CFLAGS = -Wall -O2 -std=c++17 -I$(INCLUDE_DIR)
+# Executable name
+EXECUTABLE = ePIC++
 
-# Default target
-all: $(TARGET)
+# Default rule
+all: welcome $(OBJDIR) compiling_field compiling_linalg $(EXECUTABLE)
+	@echo "Compilation complete. Run './$(EXECUTABLE) ./inputfiles/inputfilename' to execute."
 
-# Rule to build the executable
-$(TARGET): $(OBJS)
-	@echo "linking object file to make $(TARGET)"
-	$(CC) $(CFLAGS) $(LIB_DIRS) -o $(TARGET) $(OBJS) $(LIBS) $(FFLAGS)
-#rm -f $(OBJS)  
+# Welcome message
+welcome:
+	@echo "1D Electrostatic  PIC (Particle-in-Cell) Simulation Program Compilation!"
 
-# Rule to build object files from source files
-$(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<  
+# Create the object directory
+$(OBJDIR):
+	@mkdir -p $(OBJDIR)
 
-# Rule to clean up object files and executable
+# Compile each source file into object files
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@echo "Compiling $< ..."
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
+
+
+# Linking object files to create executable
+$(EXECUTABLE): $(OBJECTS)
+	@echo "Linking object files to create $(EXECUTABLE) ..."
+	@$(CXX) $(CXXFLAGS) -o $@ $^ $(LIB_DIRS) $(LIBS)
+
+# Clean rule to remove object files and executable
 clean:
-	@echo "Cleaning executables and object files"
-	rm -f $(OBJS) $(TARGET)
+	@rm -f $(OBJDIR)/*.o $(EXECUTABLE)
+	@echo "Cleanup complete."
 
+# Phony targets
+.PHONY: all welcome compiling_field compiling_linalg clean

@@ -13,8 +13,13 @@ file_name = 'result.h5'
 path = sys.argv[1]
 
 #----------------Read hdf5 file ------------
+#f = h5py.File(pjoin(path, file_name), 'r', driver='core', map='read')
 f = h5py.File(pjoin(path, file_name), 'r')
 metadata_group = f['/metadata']
+metadata_electron = f['/metadata_species/electron']
+metadata_ion = f['/metadata_species/ion']
+metadata_negion = f['/metadata_species/negion']
+#metadata_beam = f['/metadata_species/beam']
 
 
 eps0 = constants('electric constant')
@@ -29,36 +34,36 @@ NUM_TS = metadata_group.attrs['NUM_TS']
 write_interval  = metadata_group.attrs['write_int']
 write_interval_phase = metadata_group.attrs['write_int_phase']
 DT_coeff = metadata_group.attrs['DT_coeff']
-nParticlesE = metadata_group.attrs['nE']
-nParticlesI = metadata_group.attrs['nI']
-nnParticlesN = metadata_group.attrs['nN']
-nnParticlesB = metadata_group.attrs['nB']
-Te = metadata_group.attrs['Te']
-Ti = metadata_group.attrs['Ti']
-Tb = metadata_group.attrs['Tb']
-Tn = metadata_group.attrs['Tn']
-alp = metadata_group.attrs['alpha']
-beta = metadata_group.attrs['beta']
-mi = metadata_group.attrs['mI']
-mn = metadata_group.attrs['mN']
-mb = metadata_group.attrs['mB']
+LD = metadata_group.attrs['LDe']
+LDi = metadata_group.attrs['LDi']
+we = metadata_group.attrs['wpe']
+wp = metadata_group.attrs['wpi']
 n0 = metadata_group.attrs['density']
 save_fig = metadata_group.attrs['save_fig']
+normscheme = metadata_group.attrs['norm_scheme']
+
+Te = metadata_electron.attrs['temperature']
+Ti = metadata_ion.attrs['temperature']
+mi = metadata_ion.attrs['mass']
+ni0 = metadata_ion.attrs['density']
+nn0 = metadata_negion.attrs['density']
+ne0 = metadata_electron.attrs['density']
+
+we = metadata_group.attrs['wpe']
+wp = metadata_group.attrs['wpi']
+
+mfactor = wp/we
+if normscheme == 2 or normscheme == 1:
+    mfactor = 1
+print("mfactor:",mfactor)
+
 EV_TO_K = 11604.52 
 DATA_TS = int(NUM_TS/write_interval) + 1
 
-#-------------------plasma frequenct and debye lenght calculation---------------------------
-ni0 = n0
-ne0 = n0*((1-alp-beta*alp))
-nn0 = alp*ni0  
-nb0 = beta*ni0
-
-LD = np.sqrt(eps0*kb*Te*EV_TO_K/(ne0*e**2)) # Characteristic Debye length
-we = np.sqrt(ne0*e**2/(eps0*me)) # Total Plasma Frequency
-DT = DT_coeff*(1.0/we)
+#DT = DT_coeff*(1.0/we)
+DT = DT_coeff*(1.0/wp)
 
 #----------------------------------------------------------------------------------
-
 #transform elctric field data into a 2D array
 
 electric_field_data = []
@@ -71,9 +76,10 @@ for i, time_step in enumerate(time_steps):
 # Combine electric field data into a 2D array
 EF = np.vstack(electric_field_data)
 
-x = np.linspace(0,NC, EF.shape[0])
+x = np.linspace(0,NC, EF.shape[1])
 dx = x[1]-x[0]
-print("The shape of EF is: ", EF.shape)
+print("The shape of EF is: ", EF.shape[1])
+print("The value of dx is: ", dx)
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 wpet_1 = 0
@@ -84,7 +90,7 @@ y2 = wpet_2/(DT_coeff*write_interval)
 E = EF[int(y1):int(y2),:]
 #nde = nde[int(y1):int(y2),:]
 
-#print("The shape of E (reduced EF) is: ", E.shape)
+print("The shape of E (reduced EF) is: ", E.shape)
 #+++++++++++++++++++++++++ FFT of E-field data ++++++++++++++++++++++++++++++++
 F = np.fft.fftn(E, norm='ortho')
 #F = np.fft.fftn(nde, norm='ortho')
@@ -93,7 +99,7 @@ F = np.fft.fftn(E, norm='ortho')
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 NUM_TS1 = wpet_1/DT_coeff
 NUM_TS2 = wpet_2/DT_coeff
-actual_sim_time = (NUM_TS2 - NUM_TS1)*(DT) # Previously it was (NUM_TS*DT)
+actual_sim_time = (NUM_TS2 - NUM_TS1)*(DT)*mfactor # Previously it was (NUM_TS*DT) # multiply by mfactror to convert to ion scale
 # -----------------------------------------------------------------------------
 omega = 2*np.pi*np.arange(NUM_TS)/(actual_sim_time) #(DT*NUM_TS) #(actual_sim_time) # Unnormalized Omega
 k     = 2*np.pi*np.arange(NC+1)/(NC*dx*LD) # Normalized 
@@ -107,16 +113,44 @@ halflen = np.array(F.shape, dtype=int)//2
 Omega = Omega[:halflen[0],:halflen[1]]
 K = K[:halflen[0],:halflen[1]]
 F = F[:halflen[0],:halflen[1]]
-Omega /=we # Normalized Omega
+Omega /= wp # Normalized Omega
+#Omega = Omega*mfactor
 K = K*(LD)  # Normalized K
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++ Raw Analytic Part Calculation ++++++++++++++++++++++++++++++
-raw_analytic = True
-if raw_analytic:    
-    #wla = np.sqrt((we**2*(1 + 0.5*3*k**2*LD**2)))
-    wla = np.sqrt(we**2 + (3/2)*(we*LD)**2*k**2)    
-    ep = wla/we    # Electron Plasma Wave (Langmuir Wave)
-    
+raw_analytic_EPW = True
+if raw_analytic_EPW:    
+    #epe = np.sqrt((we**2*(1 + 0.5*3*k**2*LD**2)))
+    epe = np.sqrt(we**2 + 2*(3/2)*(we*LD)**2*k**2)
+    #epe = np.sqrt(we**2)# + 2*(3/2)*(we*LD)**2*k**2)       
+    #epe = wla/we    # Electron Plasma Wave (Langmuir Wave)
+
+
+raw_analytic_PW = False
+if raw_analytic_PW:    
+    pw = np.full(len(k), we)
+    #epe = epe/we
+
+
+#DAW = np.sqrt(Ti*e/md)*np.sqrt(nd/1e13)
+raw_analytic_IAW = True
+if raw_analytic_IAW:    
+    epi = np.sqrt((Te*EV_TO_K*kb/mi)*(1/(1+k**2*LD**2)) + (Ti*EV_TO_K*kb/mi))*k
+    epi = np.sqrt((Te*EV_TO_K*kb/mi)*(1/(1+k**2*LD**2))*(ni0/ne0) + (Te*EV_TO_K*kb/mi)*(nn0/ne0))*k 
+    #epi = DAW*k
+    #epi = wla/wp    # Electron Plasma Wave (Langmuir Wave)
+
+alp = 1#metadata_negion.attrs["density"]
+beta = 0#metadata_beam.attrs["density"]
+alpha = alp/(1+alp+beta)
+k1 = np.arange(0, 2000, 0.01)
+
+#mi = 1e-15
+raw_analytic_FIAW = True
+if raw_analytic_FIAW:    
+    ilw = np.sqrt(((Ti*EV_TO_K*kb/mi)*(1 + alpha + 3*(k1**2*LDi**2) + 3*(1-alpha)*(Ti/Te)))/((k1*LDi)**2 + (Ti/Te)*(1-alpha)))*k1
+
+
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #F_real = np.real(F)
 #F_imag = np.imag(F)
@@ -125,7 +159,7 @@ Z = np.log(np.abs(F))
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 figsize = np.array([80,80/1.618]) #Figure size in mm (FOR SINGLE FIGURE)
-dpi = 1200                        #Print resolution
+dpi = 300                        #Print resolution
 ppi = np.sqrt(1920**2+1200**2)/24 #Screen resolution
 
 mp.rc('text', usetex=False)
@@ -136,31 +170,61 @@ mp.rc('xtick', labelsize=10)
 mp.rc('ytick', labelsize=10)
 mp.rc('legend', fontsize=10)
 
+
 #-----------plotting --------------------------------------------------------
 
 #fig,ax = plt.subplots(figsize=figsize/25.4,constrained_layout=True,dpi=ppi)
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize = figsize/10.4,constrained_layout=True,dpi=ppi)
 #c1 = plt.pcolor(K, Omega, Z,cmap='rainbow',shading='auto',vmin=np.min(Z),vmax=np.max(Z))##
-c1 = plt.pcolor(K, Omega, Z, cmap='rainbow',shading='auto',vmin= - 3,vmax = 3)
+#c1 = plt.pcolor(K, Omega, Z, cmap='rainbow',shading='auto',vmin= -6,vmax = 6)
 c1 = plt.contourf(K, Omega, Z, cmap='rainbow',shading='auto',vmin=np.min(Z),vmax=np.max(Z))
-#c2 = plt.contourf(K, Omega, z, cmap='rainbow',shading='auto',vmin=np.min(z),vmax=np.max(z))
-#plt.contourf(K, Omega, f, cmap='rainbow',shading='auto',vmin=np.min(f),vmax=np.max(f))
-#c2 = plt.contour(x*LD,y/we,z , color ='r') ##
+
 
 print(np.min(Z), np.max(Z))
 
-if raw_analytic:
-    plt.plot(k*LD, ep, color='k', linestyle='--', lw = 1.0, label='$EPW$')
+#print(np.max(k*LD))
 
-# Note: Changing vmin & vmax will change the depth of the plots.
+if normscheme == 2 or normscheme == 4:
+    LD = LDi
+    we = wp
+#if normscheme == 4:
+    #LD = LDi
+    #we = we    
+if normscheme == 1 or normscheme == 3:
+    LD = LD
+    we = we
+
+
+print(np.max(k1*LD))
+
+
+if raw_analytic_EPW:
+    plt.plot(k*LD, epe/we, color='k', linestyle='--', lw = 1.0, label='$EPW$')
+    #plt.plot(k*LD, ep, color='k', linestyle='--', lw = 1.0, label='$IAW$')
+
+if raw_analytic_PW:
+     plt.plot(k*LD, pw/we, color='k', linestyle='--', lw = 1.0, label='$plasma oscillation$')
+
+
+if raw_analytic_IAW:
+    #plt.plot(k*LD, ep, color='k', linestyle='--', lw = 1.0, label='$EPW$')
+    plt.plot(k*LD, epi/we, color='k', linestyle='solid', lw = 1.0, label='$IAW$')
+
+if raw_analytic_FIAW:
+    #plt.plot(k*LD, ep, color='k', linestyle='--', lw = 1.0, label='$EPW$')
+    plt.plot(k1*LD, ilw/we, color='k', linestyle='dotted', lw = 1.0, label='$FIAW$')
+
+
+
+# Note: Changing vmin & vmax will change the depth of the plots.e
 cbar = plt.colorbar()
 cbar.set_label('$\zeta$')
 
-ax.set_xlabel('$k \lambda_{D}$')
+ax.set_xlabel('$k \lambda_{De}$')
 ax.set_ylabel('$\omega/\omega_{pe}$')
 #ax.set_xlim([0, np.max(K)])
-ax.set_xlim([0,3.0])
-ax.set_ylim([0,5])
+#ax.set_xlim([0,3])
+#ax.set_ylim([0,50])
 leg = ax.legend(loc='upper right',framealpha=0.5)
 plt.savefig(pjoin(path,'dispersion.png'),dpi=dpi)
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

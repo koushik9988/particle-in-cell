@@ -4,34 +4,80 @@
 #include <iostream>
 #include <list>
 #include <vector>
-#include "domain.h"
+
 #include <thread>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <filesystem>
+#include <mutex>
+#include <functional>
+#include <init.h>
+#include <tuple>
+#include "slap.h"
+#include "domain.h"
 
 using namespace std;
 
 class Domain;
 
+
+/**
+ * @class Particle
+ * @brief Particle class to hold particel position and velocity data.
+ */
+/// @brief
 class Particle
 {
     public:
     double pos;
-    double vel;
-
+    double vel[3];
+    //store velocity at (t-0.5dt)
+    double prevvel[3];
     //particle constructor
-    Particle(double x, double v):pos(x), vel(v){};
+    Particle(double x, double vx, double vy, double vz)
+    {
+        pos = x;
+        vel[0] = vx;
+        vel[1] = vy;
+        vel[2] = vz;
+    }
+
 };
 
+
+/**
+ * @class Species
+ * @brief represent indivitual species and each species propery and various methods .
+ */
+
+/// @brief
 class Species
 {
     public:
+    /// species name
     string name;
+    /// species mass
     double mass;
+    /// species charge
     double charge;
+    /// @brief specific weight
     double spwt;
+    /// @brief species temparature
     double temp;
-    double *den;
+    /// @brief density
+    vec<double> den;
+    vec<double> velmesh;
+    /// @brief no of simulation particle
     int numparticle;
+    /// @brief 
     int charge_sig;
+    std::string initialization;
+
+    double vs;
+    double fract_den;
 
     // the "part_list" is a linked list that holds instances of the Particle class.
     //list/vector is a template class and Particle is template argument(similar to regular int,double etc)
@@ -39,26 +85,98 @@ class Species
     //(C++ STL containers such as vector,list can hold generic data type like class etc.)
     //list<Particle> part_list;
     //or
+    
     vector<Particle> part_list;
 
-    //constructor 
-    Species(string name, double mass, double charge, double spwt, double temp, int numparticle,Domain &domain);
+    vec<double> velprev;
 
-    //Destructor
-    //~Species();
+
+    //vector<vec<double>> buffers;
+    //buffers.reserve();
+
+    /**
+     * @brief Constructor for species class.
+     * @param mass mass of species.
+     * @param charge charge of species
+     * @param spwt specific weight of species
+     * @param temp temparature of species
+     * @param numparticle number pf simulation particle
+     */
+    Species(string name, double mass, double charge, double spwt, double temp, int numparticle, double vs, double fract_den, std:: string initialization, Domain &domain);
 
     //declare member functions or methods
+    /**
+     * @brief function to Add Particle.
+     * @param part particle class instances.
+     */
     void AddParticle(Particle part);
-    void Push_species();
-    void Push_species_open();
-    void update(int start, int end);
-    void Push_species_parallel();
+    /**
+     * @brief function to move the particle.
+     * @param species_list list of species.
+     * @param sub_cycle sub cycle interval.
+     */
+    void Push_species(vector<Species> &species_list, int sub_cycle);
+    /**
+     * @brief helper function for particle mover parallization.
+     * @param start staring index for one thread.
+     * @param end end index for one thread
+     * @param sub_cycle sub cycle interval.
+     * @param species_list list of species
+     */
+    void update(int start, int end, int sub_cycle,vector<Species> &species_list);
+    /**
+     * @brief serial code for particle mover function.
+     * @param sub_cycle sub cycle interval.
+     * @param species_list list of species
+     */
+    void Push_species_serial(vector<Species> &species_list, int sub_cycle);
+    /**
+     * @brief function to deposit charge on grid points.
+     */
     void ScatterSpecies();
+    /**
+     * @brief function to deposit charge on grid points.
+     */
+    void ScatterSpecies_serial();
+    /**
+     * @brief helper function for parallal charge deposition.
+     * @param threadidx current thread index 
+     * @param start staring index for one thread.
+     * @param end end index for one thread
+     */
+    void parall_deposit(int threadidx, int start, int end);
+    /**
+     * @brief function of rewind velocity by half time step (which is required for leap-froging).
+     */
     void Rewind_species();
+    /**
+     * @brief function to compute kinetic energy
+     * @param species normalizing species 
+     */
     double Compute_KE(Species &species);
+    /**
+     * @brief function to compute momentum energy
+     * @param species normalizing species 
+     */
+    //double Compute_Momentum(Species &species);
+    std::tuple<double, double, double> Compute_Momentum(Species &species);
+    /**
+     * @brief function to check if a species is Ion.
+     */
+    bool IsIon();
+
+    void ScatterVel_serial();
 
     private:
-    Domain &domain;
-    
+    Domain &domain;  
 };
+
+
+/**
+*@brief function for secondary elctron emission.
+* @param species instances of sepcies class.
+* @param domain instances of domain class.
+*/
+void SEE(Species &species, Domain &domain);
+
 #endif 

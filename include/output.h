@@ -6,16 +6,21 @@
 #include <filesystem>
 #include <string>
 #include <sstream>
-#include "domain.h"
-#include "species.h"
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <memory>
+#include "domain.h"
+#include "species.h"
+#include "math.h"
+#include "slap.h"
+#include "matplotlibcpp.h"
 
 #include "H5Cpp.h"
 
 using namespace H5;
+namespace plt = matplotlibcpp;
 
 class Domain;
 class Species;
@@ -26,23 +31,47 @@ class Output
 
     std::map<std::string, Group> particle_groups;
     std::map<std::string, Group> den_subgroups;
+    std::map<std::string, Group> vel_subgroups;
 
     Output(const std::filesystem::path& outputfolder, Domain& domain);
     //~Output();
     void write_particle_data(int ts, Species& species);
     //void write_particle_data(H5::Group& group, int ts, Species& species);
     void write_den_data(int ts,  Species& species);
+    void write_vel_data(int ts,  Species& species);
     void write_field_data(int ts);
     //void write_ke(int ts,std::vector<Species> &species_list);
     void write_ke();
+    void write_m();
     void storeKE_to_matrix(int ts, std::vector<Species> &species_list);
+    void storem_to_matrix(int ts, std::vector<Species> &species_list);
     void printmatrix(int row, int col, double **matrix);
-    void diagnostics(int ts, double max_phi, std::vector<Species> &species_list);
-    void write_metadata(int NC, int NUM_TS, int write_int, int write_int_phase, double DT, int nE, int nI, int nN, int nB, double Te, double Ti, double Tb, double Tn, double alpha,
- double beta, double mI, double mN, double mB, double density, int save_fig, double ve, double vi, double vn, double vb);
-    double **store_ke;
+    void diagnostics(int ts, std::vector<Species> &species_list);
+    void write_metadata(int NC, int NUM_TS, int write_int, int write_int_phase, double DT,double density, int save_fig, int normscheme, 
+        int subcycleint,double LDe, double LDi, double wpe, double wpi,int spno, double GAS_DENSITY, double max_electron_collision_freq);
+    void write_species_metadata(std::vector<Species>& species_list);
+
+    //data structure to temporarily store kinetic energy and momentum data.
+
+    Matrix<double> store_ke;
+    Matrix<double> store_m;
+
     int sp_no ;//= species_list.size();
     int t_step;// = int(domain.NUM_TS/domain.write_interval) + 1 ;
+    
+    int precision;
+
+    //plotting flag
+    int Energy_plot;
+    int Potentialfield_plot;
+    int Chargedensity_plot;
+    int keflag;
+    int peflag;
+    int teflag;
+    int phase_plot;
+    int dft_flag;
+    int species_index;
+
     private:
     //Species &species;
     std::filesystem::path outputfolder;
@@ -51,6 +80,8 @@ class Output
     Group field_data_group;
     Group time_group;
     Group metadata_group;
+    Group metadata_species;
+    //std::ofstream report;
     //std::vector<Species> species_list;
    
 };
