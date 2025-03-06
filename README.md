@@ -1,4 +1,4 @@
-# Electrostatic 1D Particle-in-Cell (PIC) Code
+# Electrostatic 1D Particle-in-Cell (PIC) Code , ePIC++
 
 This repository contains an electrostatic 1D Particle-in-Cell (PIC) code developed for simulating plasma systems. The code is capable of simulating basic plasma phenomena.
 
