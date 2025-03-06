@@ -46,7 +46,7 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 2. Run the code:
 The executble will be located in the build directory after building with cmake.
     ```bash
-    ./ePIC++ ../inputfiles/input
+    ./ePIC++ ../inputfiles/input.ini
     ```
 
 # Explanation of `input.ini` File Parameters
@@ -135,7 +135,7 @@ The `input.ini` file contains parameters for configuring the simulation. Each se
 ## `[species]`
 
 Each line represents a species and its properties in the following format:
-  
+(Note : Electron should be in the first line and Ion should be in the 2nd line and all other species will go after that.)
   ```
   name, mass, number_of_particles, temperature, charge_sign, density_ratio, streaming_velocity, load_type
   ```
