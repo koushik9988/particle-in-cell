@@ -135,9 +135,9 @@ The `input.ini` file contains parameters for configuring the simulation. Each se
 ## `[species]`
 
 Each line represents a species and its properties in the following format:
-(Note : Electron should be in the first line and Ion should be in the 2nd line and all other species will go after that.)
+
   ```
-  name, mass, number_of_particles, temperature, charge_sign, density_ratio, streaming_velocity, load_type
+  name, mass, number_of_particles, temperature, charge_sign, normalized density (w.r.t electron density), streaming_velocity, load_type
   ```
   
 Example species configuration:
@@ -147,7 +147,7 @@ Example species configuration:
   ion, 6.63352090e-26, 50000, 0, 1, 0, 0, uniform
   beam, 9.10938215E-31, 50000, 1, -1, 1, 10, uniform
   ```
-
+(Note : Electron should be in the first line and Ion should be in the 2nd line and all other species will go after that.)
 
 
  # Data processing and visualization
