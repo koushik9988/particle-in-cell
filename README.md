@@ -8,8 +8,8 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 
 ## Requirements
 - Python3
-- GNU C++ compiler(g++)
-- GNU make
+- GNU C++ compiler / clang
+- cmake
 - [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
 - git
 - Matplotlib
@@ -28,12 +28,15 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
     cd your_repository
     ```
 
-3. Build the code using make:
+3. Build the code using cmake:
     ```bash
-    make clean
+    mkdir build && cd build
     ```
     ```bash
-    make all
+    cmake ..
+    ```
+    ```bash
+    cmake --build .
     ```
 
 ### Running the Code
