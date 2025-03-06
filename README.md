@@ -8,6 +8,7 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 
 ## Requirements
 - Python3
+- python3-dev
 - GNU C++ compiler / clang
 - cmake
 - [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
@@ -43,12 +44,12 @@ This repository contains an electrostatic 1D Particle-in-Cell (PIC) code develop
 1. Configure the simulation parameters in the `input.ini` file.
 2. Run the code:
     ```bash
-    g++ ./pic
+    ./ePIC++ ../inputfiles/input
     ```
 
-# Explanation of input.ini file Parameters
+# Explanation of `input.ini` File Parameters
 
-The input file `input.ini` contains parameters for configuring the simulation. Each section corresponds to a different aspect of the simulation setup.
+The `input.ini` file contains parameters for configuring the simulation. Each section corresponds to a different aspect of the simulation setup.
 
 ## `[file]`
 
@@ -57,60 +58,95 @@ The input file `input.ini` contains parameters for configuring the simulation. E
 ## `[time]`
 
 - **NUM_TS**: Total number of time steps for the simulation.
+- **DT_coeff**: Coefficient for calculating the time step:
+  
+  ```math
+  dt = DT_{\text{coeff}} \frac{1}{\omega_{\text{pe}}}
+  ```
 
 ## `[diagnostics]`
 
-- **write_interval**: Interval for writing density and field data in result.txt file.
-- **write_interval_phase**: Interval for writing phase-space data file.
+- **write_interval**: Interval for writing density and field data.
+- **write_interval_phase**: Interval for writing phase-space data.
 - **write_diagnostics**: Interval for writing diagnostic outputs.
-- **DT_coeff**: Time step.
-  
- $$dt = DT_{\text{coeff}} \frac{1}{\omega_{\text{pe}}}$$
+- **write_flag**: Flag for controlling data writing:
+  - `1`: Write both phase and field data.
+  - `2`: Write only field data.
+  - `3`: Write only phase data.
+  - `0`: Write no data.
+- **save_fig**: Flag for saving figures.
+- **sub_cycle_interval**: Interval for sub-cycling diagnostics.
+- **precision**: Precision level for diagnostics output.
+- **diagtype**: Type of diagnostic output (`basic`).
 
- Normalized time step
+## `[visualplot]`
 
- $$dt = DT_{\text{coeff}} \frac{1}{\omega_{\text{pe}}}{\omega_{pe}}$$
-
-  
-
-- **write_flag**: Flag for controlling data writing: 
-  - 1: Write both phase and field data.
-  - 2: Write only field data.
-  - 3: Write only phase data.
-  - 0: Write no data.
+- **Energy_plot**: Flag for plotting energy.
+- **keflag**: Flag for kinetic energy plot.
+- **peflag**: Flag for potential energy plot.
+- **teflag**: Flag for total energy plot.
+- **Potentialfield_plot**: Flag for plotting potential field.
+- **Chargedensity_plot**: Flag for plotting charge density.
+- **phase_plot**: Flag for plotting phase space.
+- **species_index**: Index of species for phase plot.
+- **dft_rho**: Flag for performing discrete Fourier transform of density.
 
 ## `[domain]`
 
 - **NC**: Number of cells in the domain.
 - **x0**: Initial position of the domain.
 
-## `[population]`
+## `[normalization]`
 
-- **nParticlesE**: Number of electrons loaded into the domain.
-- **nParticlesI**: Number of ions loaded into the domain.
-- **nParticlesN**: Number of negative ions loaded into the domain.
-- **nParticlesB**: Number of background particles.
-- **tempE**: Temperature of electrons.
-- **tempI**: Temperature of ions.
-- **tempN**: Temperature of negative ions.
-- **tempB**: Temperature of background particles.
-- **massE**: Mass of electrons.
-- **massI**: Mass of ions.
-- **massN**: Mass of negative ions.
-- **massB**: Mass of background particles.
+- **norm_scheme**: Normalization scheme.
+- **vel_norm_scheme**: Velocity normalization scheme.
+- **lenght_scale**: Length scale for normalization.
+- **time_scale**: Time scale for normalization (`omegape`).
+- **energy_scale**: Energy scale for normalization.
 
 ## `[simulation]`
-- **number_of_species**: Number of species.
-- **v_i**: Ion streaming velocity.
-- **v_e**: Electron streaming velocity.
-- **v_b**: Beam particle streaming velocity.
-- **v_n**: Negative ion streaming velocity.
+
+- **shapefunction**: Shape function for particle interpolation (e.g., `CIC`).
+- **push_parallal**: Boolean flag for parallel particle pushing.
+- **deposit_parallal**: Boolean flag for parallel charge deposition.
 - **density**: Plasma density.
-- **alpha**: Fraction of negative ion to background positive ion
-- **beta**: fraction of negative beam to background negative ion 
-- **bc**: Boundary condition.
-   - 1: pbc for periodic boundary.
-   - 2: open for open boundary condition.
+- **bc**: Boundary condition:
+  - `pbc`: Periodic boundary condition.
+  - `open`: Open boundary condition.
+- **see_rate**: Secondary electron emission rate.
+- **tempwall**: Temperature at the wall.
+- **ionfixed**: Flag for fixing ions.
+
+## `[solver]`
+
+- **solvertype**: Type of solver (`direct`).
+- **tolerance**: Solver tolerance.
+- **max_iteration**: Maximum number of solver iterations.
+
+## `[collision]`
+
+- **elastic**: Boolean flag for elastic collisions.
+- **excitation**: Boolean flag for excitation collisions.
+- **ionization**: Boolean flag for ionization collisions.
+- **GAS_DENSITY**: Gas density in the simulation (`1e20`).
+
+## `[species]`
+
+Each line represents a species and its properties in the following format:
+  
+  ```
+  name, mass, number_of_particles, temperature, charge_sign, density_ratio, streaming_velocity, load_type
+  ```
+  
+Example species configuration:
+  
+  ```
+  electron, 9.10938215E-31, 50000, 1, -1, 1, -10, uniform
+  ion, 6.63352090e-26, 50000, 0, 1, 0, 0, uniform
+  beam, 9.10938215E-31, 50000, 1, -1, 1, 10, uniform
+  ```
+
+
 
  # Data processing and visualization
  1. Plot kinetic enegy ,potential enegy and total enegy
