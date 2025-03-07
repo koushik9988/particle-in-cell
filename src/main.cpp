@@ -64,7 +64,7 @@ int main( int argc , char *argv[])
     //grid/domain
     int NC = INIParser::getInt(iniData["domain"], "NC");//cell no
     int ni = NC+1; // no of grid points is one more than cell no
-    double x0 = INIParser::getDouble(iniData["domain"],"x0");
+    double x0 = INIParser::getInt(iniData["domain"],"x0");
 
     //diagnostic
     int save_fig = INIParser::getDouble(iniData["diagnostics"],"save_fig");
@@ -148,7 +148,7 @@ int main( int argc , char *argv[])
         std::vector<std::string> tokens = INIParser::split(line, ',');
 
         if (tokens.size() == 8)
-        {  // Ensure we have 5 tokens
+        {  
             names.push_back(tokens[0]);                      // Species name
             mass.push_back(std::stod(tokens[1]));
             nParticles.push_back(std::stoi(tokens[2]));      // Number of particles

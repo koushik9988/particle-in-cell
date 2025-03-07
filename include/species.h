@@ -32,21 +32,24 @@ class Domain;
 class Particle
 {
     public:
-    double pos;
-    double vel[3];
+    double x;
+    //double vel[3];
+    double vx, vy, vz;
     //store velocity at (t-0.5dt)
-    double prevvel[3];
+    double pvx,pvy,pvz;
     //particle constructor
     Particle(double x, double vx, double vy, double vz)
     {
-        pos = x;
-        vel[0] = vx;
-        vel[1] = vy;
-        vel[2] = vz;
+        this->x = x;
+        this->vx = vx;
+        this->vy = vy;
+        this->vz = vz;
+        //vel[0] = vx;
+        //vel[1] = vy;
+        //vel[2] = vz;
     }
 
 };
-
 
 /**
  * @class Species

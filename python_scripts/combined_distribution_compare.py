@@ -8,8 +8,8 @@ import sys
 import matplotlib.animation as animation
 
 # Set paths for two data files
-path1 = "../data_esw_coll_1e18" 
-path2 = "../data_esw_nocoll"  
+path1 = sys.argv[1]#"../data_coll_1e15" 
+path2 = sys.argv[2]#"../data_nocoll"  
 
 # HDF5 file name and paths for plots
 file_name = 'result.h5'

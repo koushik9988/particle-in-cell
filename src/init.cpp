@@ -33,7 +33,7 @@ Init::Init(Species &species, Domain &domain) : species(species),domain(domain)
             {
                 x = x - domain.xL;
             }
-            if(x < 0)
+            else if(x < 0)
             {
                 x = x + domain.xL;
             }
@@ -45,11 +45,10 @@ Init::Init(Species &species, Domain &domain) : species(species),domain(domain)
             {
                 x = x - domain.xL;
             }
-            if(x < 0)
+            else if(x < 0)
             {
                 x = x + domain.xL;
-            }
-            //display::print(x);
+            }            
         }
         else if (init_type == "sin") 
         {
@@ -60,7 +59,7 @@ Init::Init(Species &species, Domain &domain) : species(species),domain(domain)
             {
                 x = x - domain.xL;
             }
-            if(x < 0)
+            else if(x < 0)
             {
                 x = x + domain.xL;
             }
@@ -74,7 +73,7 @@ Init::Init(Species &species, Domain &domain) : species(species),domain(domain)
             {
                 x = x - domain.xL;
             }
-            if(x < 0)
+            else if(x < 0)
             {
                 x = x + domain.xL;
             }
@@ -88,7 +87,7 @@ Init::Init(Species &species, Domain &domain) : species(species),domain(domain)
             {
                 x = x - domain.xL;
             }
-            if (x < 0)
+            else if (x < 0)
             {
                 x = x + domain.xL;
             }
@@ -102,8 +101,7 @@ Init::Init(Species &species, Domain &domain) : species(species),domain(domain)
         vy = vy / domain.vel_norm;
         vz = vz / domain.vel_norm;
 
-        species.AddParticle(Particle(x, vx,vy,vz));
-        //display::print(x);
+        species.AddParticle(Particle(x,vx,vy,vz));
     }
 }
 

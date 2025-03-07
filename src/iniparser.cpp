@@ -65,7 +65,6 @@ std::string INIParser::getString(const std::map<std::string, std::string> &secti
     return section.at(key);
 }
 
-
 void INIParser::trim(std::string &str)
 {
     if (str.empty()) 

@@ -281,11 +281,11 @@ void Output::write_particle_data(int ts, Species& species)
 
     for (Particle& p : species.part_list) 
     {
-        phase_data.push_back(p.pos);
+        phase_data.push_back(p.x);
         //velocity at time t is average of v(t-0.5*dt) and v(t+0.5*dt)
-        phase_data.push_back(p.vel[0]);
-        phase_data.push_back(p.vel[1]);
-        phase_data.push_back(p.vel[2]);
+        phase_data.push_back(p.vx);
+        phase_data.push_back(p.vy);
+        phase_data.push_back(p.vz);
     }
 
     dataset_phase.write(phase_data.data(), H5::PredType::NATIVE_DOUBLE);
@@ -535,6 +535,9 @@ void Output::diagnostics(int ts, std::vector<Species> &species_list)
     std::vector<double> x;
     std::vector<double> vx;
 
+    std::vector<double> x1;
+    std::vector<double> vx1;
+
     time.push_back(ts * domain.DT);
 
     if (Energy_plot == 1 && domain.diagtype == "full")
@@ -556,8 +559,16 @@ void Output::diagnostics(int ts, std::vector<Species> &species_list)
         //vx.clear();
         for(auto &part : species_list[species_index].part_list)
         {
-            x.push_back(part.pos);
-            vx.push_back(part.vel[0]);
+            x.push_back(part.x);
+            vx.push_back(part.vx);
+            //x.push_back(part.vel[0]);
+            //vx.push_back(part.vel[1]);
+        }
+///////////////////////////////////////////////
+        for(auto &part : species_list[2].part_list)
+        {
+            x.push_back(part.x);
+            vx.push_back(part.vx);
             //x.push_back(part.vel[0]);
             //vx.push_back(part.vel[1]);
         }
@@ -622,19 +633,29 @@ void Output::diagnostics(int ts, std::vector<Species> &species_list)
         plt::legend();
     }
 
+
     double marker_size = 1.0;
-    std::map<std::string, std::string> style_options = {{"color", "red"},{"marker", "o"}};
-   
+    std::map<std::string, std::string> style_options1 = {{"color", "blue"}, {"marker", "o"}};   
+    std::map<std::string, std::string> style_options2 = {{"color", "red"}, {"marker", "o"}};
+
     if (phase_plot == 1 && domain.diagtype == "full")
     {   
-        std::string label = species_list[species_index].name; 
-        std::map<std::string, std::string> scatter_keywords;
-        scatter_keywords["label"] = label; // Label for the legend
+        std::string label1 = species_list[species_index].name ;
+        std::string label2 = species_list[2].name ;
 
-        // Plot the scatter plot
+        std::map<std::string, std::string> scatter_keywords1;
+        scatter_keywords1["label"] = label1;
+        scatter_keywords1["color"] = "black"; // Explicitly set color
+
+        std::map<std::string, std::string> scatter_keywords2;
+        scatter_keywords2["label"] = label2;
+        scatter_keywords2["color"] = "red"; // Explicitly set color
+
+        // Plot the scatter plots
         plt::figure(2);
         plt::clf();
-        plt::scatter(x, vx,1, scatter_keywords); // Pass scatter plot options
+        plt::scatter(x, vx, marker_size, scatter_keywords1);
+        plt::scatter(x1, vx1, marker_size, scatter_keywords2);
         plt::xlabel("x");
         plt::ylabel("v");
 
@@ -648,6 +669,7 @@ void Output::diagnostics(int ts, std::vector<Species> &species_list)
         // Show the plot
         plt::show(); 
     }
+
 
     if (Chargedensity_plot == 1 && domain.diagtype == "full")
     {   

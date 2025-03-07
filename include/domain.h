@@ -12,7 +12,7 @@
 #include "slap.h"
 #include "species.h"
 #include <fstream>
-
+#include <locale>
 
 
 class Species;
@@ -234,8 +234,8 @@ class Rnd
 {
     public:
 	//constructor: set initial random seed and distribution limits
-	//Rnd(): mt_gen{std::random_device()()}, rnd_dist{0,1.0} {}
-    Rnd(): mt_gen{0}, rnd_dist{0,1.0} {}
+	Rnd(): mt_gen{std::random_device()()}, rnd_dist{0,1.0} {}
+    //Rnd(): mt_gen{0}, rnd_dist{0,1.0} {}
 	double operator() () {return rnd_dist(mt_gen);}
 
 protected:

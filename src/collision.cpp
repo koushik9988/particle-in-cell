@@ -189,7 +189,7 @@ void CollisionHandler::handle_collisions(Species &electron, Species &target_gas)
 {
     for (Particle &part : electron.part_list)
     {
-        double v_sqr = (part.vel[0] * part.vel[0] + part.vel[1] * part.vel[1] + part.vel[2] * part.vel[2]) * domain.vel_norm * domain.vel_norm;
+        double v_sqr = (part.vx * part.vx + part.vy * part.vy + part.vz * part.vz) * domain.vel_norm * domain.vel_norm;
         double velocity = sqrt(v_sqr);
         double energy = (0.5 * Const::ME * v_sqr) / Const::eV;
         //int energy_index = std::min(static_cast<int>(energy / DE_CS + 0.5), CS_RANGES - 1);
@@ -199,7 +199,7 @@ void CollisionHandler::handle_collisions(Species &electron, Species &target_gas)
         double p_coll = 1 - exp(-nu * (domain.DT/domain.W));
         if (p_coll > rnd())
         {
-            collision_electron(part.pos, part.vel[0], part.vel[1], part.vel[2], energy_index, electron, target_gas);
+            collision_electron(part.x, part.vx, part.vy, part.vz, energy_index, electron, target_gas);
         }
     }
 }

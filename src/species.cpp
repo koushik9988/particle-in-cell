@@ -5,7 +5,7 @@
 "-> " symbol means dereferencing a pointer , here we created pointers to instances of class named domain.
 so to dereference the instances we have to use the symbol "->"*/
 
-Species::Species(string name, double mass, double charge, double spwt, double temp, int numparticle, double vs,double fract_den , std:: string initialization, Domain &domain):domain(domain)
+Species::Species(string name, double mass, double charge, double spwt, double temp, int numparticle, double vs, double fract_den , std:: string initialization, Domain &domain):domain(domain)
 {
     this->name = name;
     this->mass = mass;
@@ -40,9 +40,10 @@ void Species::Push_species_serial(vector<Species> &species_list, int sub_cycle)
 
     for(auto it = part_list.begin(); it != part_list.end();)
     {
+        
         Particle &part = *it;
         //double lc = domain.XtoL(part.pos);
-        double lc = part.pos;
+        double lc = part.x;
         //cout<<part.pos<<endl;
         // compute charge to mass ratio
         double qm = charge/mass;
@@ -51,16 +52,16 @@ void Species::Push_species_serial(vector<Species> &species_list, int sub_cycle)
         //cout<<part_ef<<endl;
         double wl = domain.LDe*domain.LDe*domain.wpe*domain.wpe;
 
-        part.vel[0] += qm*((domain.density*Const::QE*domain.L)/(Const::EPS_0*domain.W*domain.vel_norm))*part_ef*(domain.DT*sub_cycle);
+        part.vx += qm*((domain.density*Const::QE*domain.L)/(Const::EPS_0*domain.W*domain.vel_norm))*part_ef*(domain.DT*sub_cycle);
 
         //Advance particle position
 
-        double old_pos = part.pos;
+        double old_pos = part.x;
 
         //part.pos += ((domain.wp*domain.LD)/(domain.L*domain.W))*part.vel*(domain.DT*sub_cycle);
-        part.pos += ((domain.vel_norm)/(domain.L*domain.W))*part.vel[0]*(domain.DT*sub_cycle);
+        part.x += ((domain.vel_norm)/(domain.L*domain.W))*part.vx*(domain.DT*sub_cycle);
 
-        double new_pos = part.pos;
+        double new_pos = part.x;
 
         if(fabs(new_pos - old_pos) >= 1)
         {
@@ -78,38 +79,40 @@ void Species::Push_species_serial(vector<Species> &species_list, int sub_cycle)
 
         if(domain.bc == "pbc")
         {
-            if (part.pos < domain.x0)
+            if (part.x < domain.x0)
 		    {
-		        part.pos = part.pos + domain.xL;
+		        part.x = part.x + domain.xL;
 		    }
-		    else if(part.pos >= domain.x0 + domain.xL)
+		    else if(part.x >= domain.x0 + domain.xL)
 		    {
-			    part.pos = part.pos - domain.xL;
+			    part.x = part.x - domain.xL;
 		    }
 
+            
+            
             //display::print(part.pos);
         }
 
         else if (domain.bc == "rbc")
         {
-            if (part.pos < domain.x0)
+            if (part.x < domain.x0)
             {
-                part.pos = domain.x0 + (domain.x0 - part.pos); // Reflect position
-                part.vel[0] = -part.vel[0]; // Reverse velocity
+                part.x = domain.x0 + (domain.x0 - part.x); // Reflect position
+                part.vx = -part.vx; // Reverse velocity
             }
-            else if (part.pos >= domain.x0 + domain.xL)
+            else if (part.x >= domain.x0 + domain.xL)
             {
-                part.pos = domain.x0 + domain.xL - (part.pos - (domain.x0 + domain.xL)); // Reflect position
-                part.vel[0] = -part.vel[0]; // Reverse velocity
+                part.x = domain.x0 + domain.xL - (part.x - (domain.x0 + domain.xL)); // Reflect position
+                part.vx = -part.vx; // Reverse velocity
             }
         }
 
         else if(domain.bc == "open")
         {
     
-            if (part.pos < domain.x0 || part.pos >= domain.x0 + domain.xL)
+            if (part.x < domain.x0 || part.x >= domain.x0 + domain.xL)
             {
-                if(part.pos < domain.x0)
+                if(part.x < domain.x0)
                 {
                     domain.wall_left = true;
                     if(IsIon())
@@ -127,7 +130,7 @@ void Species::Push_species_serial(vector<Species> &species_list, int sub_cycle)
                         domain.vL += -1*spwt/domain.density ; 
                     }
                 }
-                if(part.pos >= domain.x0 + domain.xL)
+                if(part.x >= domain.x0 + domain.xL)
                 {
                     domain.wall_left = false;
                     if(IsIon())
@@ -175,7 +178,7 @@ void Species::update(int start, int end, int sub_cycle, vector<Species> &species
     {
         Particle &part = *it;
         // double lc = domain.XtoL(part.pos);
-        double lc = part.pos;
+        double lc = part.x;
         // Compute charge to mass ratio
         double qm = charge / mass;
 
@@ -183,19 +186,14 @@ void Species::update(int start, int end, int sub_cycle, vector<Species> &species
         double part_ef = domain.Interpolate(lc, domain.ef);
         double wl = domain.LDe * domain.LDe * domain.wpe * domain.wpe;
 
-        //velprev(index++) = part.vel;
-        part.prevvel[0] = part.vel[0];
-
-        part.prevvel[1] = part.vel[1];
-        part.prevvel[2] = part.vel[2];
         
         // Update particle velocity
-        part.vel[0] += qm * ((domain.density * Const::QE * domain.L) / (Const::EPS_0 * domain.W * domain.vel_norm)) * part_ef * (domain.DT * sub_cycle);
+        part.vx += qm * ((domain.density * Const::QE * domain.L) / (Const::EPS_0 * domain.W * domain.vel_norm)) * part_ef * (domain.DT * sub_cycle);
 
         // Advance particle position
-        double old_pos = part.pos;
-        part.pos += ((domain.vel_norm) / (domain.L * domain.W)) * part.vel[0] * (domain.DT * sub_cycle);
-        double new_pos = part.pos;
+        double old_pos = part.x;
+        part.x += ((domain.vel_norm) / (domain.L * domain.W)) * part.vx * (domain.DT * sub_cycle);
+        double new_pos = part.x;
     
         // Check for particle crossing
         if (fabs(new_pos - old_pos) >= 1)
@@ -216,35 +214,35 @@ void Species::update(int start, int end, int sub_cycle, vector<Species> &species
         // Handle boundary conditions
         if (domain.bc == "pbc")
         {
-            if (part.pos < domain.x0)
+            if (part.x < domain.x0)
             {
-                part.pos += domain.xL;
+                part.x += domain.xL;
             }
-            else if (part.pos >= domain.x0 + domain.xL)
+            else if (part.x >= domain.x0 + domain.xL)
             {
-                part.pos -= domain.xL;
+                part.x -= domain.xL;
             }
         }
 
         else if (domain.bc == "rbc")
         {
-            if (part.pos < domain.x0)
+            if (part.x < domain.x0)
             {
-                part.pos = domain.x0 + (domain.x0 - part.pos); // Reflect position
-                part.vel[0] = -part.vel[0]; // Reverse velocity
+                part.x = domain.x0 + (domain.x0 - part.x); // Reflect position
+                part.vx = -part.vx; // Reverse velocity
             }
-            else if (part.pos >= domain.x0 + domain.xL)
+            else if (part.x >= domain.x0 + domain.xL)
             {
-                part.pos = domain.x0 + domain.xL - (part.pos - (domain.x0 + domain.xL)); // Reflect position
-                part.vel[0] = -part.vel[0]; // Reverse velocity
+                part.x = domain.x0 + domain.xL - (part.x - (domain.x0 + domain.xL)); // Reflect position
+                part.vx = -part.vx; // Reverse velocity
             }
         }
 
         else if(domain.bc == "open")
         {
-            if (part.pos < domain.x0 || part.pos >= domain.x0 + domain.xL)
+            if (part.x < domain.x0 || part.x >= domain.x0 + domain.xL)
             {
-                if(part.pos < domain.x0)
+                if(part.x < domain.x0)
                 {
                     domain.wall_left = true;
                     if(IsIon())
@@ -262,7 +260,7 @@ void Species::update(int start, int end, int sub_cycle, vector<Species> &species
                         domain.vL += -1*spwt/domain.density ; 
                     }
                 }
-                if(part.pos >= domain.x0 + domain.xL)
+                if(part.x >= domain.x0 + domain.xL)
                 {
                     domain.wall_left = false;
                     if(IsIon())
@@ -323,7 +321,8 @@ void Species::ScatterSpecies_serial()
     den = 0;
     for(Particle &part : part_list)
     {
-        double lc = domain.XtoL(part.pos);
+        double lc = domain.XtoL(part.x);
+        //double lc = part.pos;
         domain.Scatter(lc,spwt,den);
     }
 
@@ -349,8 +348,8 @@ void Species::ScatterVel_serial()
     velmesh = 0;
     for(Particle &part : part_list)
     {
-        double lc = domain.XtoL(part.pos);
-        domain.Scatter(lc,spwt*part.vel[0],velmesh);
+        double lc = domain.XtoL(part.x);
+        domain.Scatter(lc,spwt*part.vx,velmesh);
     }
 
     velmesh /= (domain.dx*domain.L);
@@ -379,7 +378,7 @@ void Species::parall_deposit(int threadidx, int start, int end)
     for(int i = start; i < end; i++)
     {
         Particle &part = part_list[i];
-        double lc = domain.XtoL(part.pos);
+        double lc = domain.XtoL(part.x);
         domain.Scatter(lc,spwt,domain.buffers[threadidx]);
     }
 }
@@ -440,7 +439,7 @@ void Species::Rewind_species()
 {
     for (Particle &part: part_list)
     {
-        double lc = domain.XtoL(part.pos);
+        double lc = domain.XtoL(part.x);
         //double lc = part.pos;
         // compute charge to mass ratio
         double qm = charge/mass;
@@ -448,7 +447,7 @@ void Species::Rewind_species()
         double part_ef = domain.Interpolate(lc,domain.ef);
         double wl = domain.LDe*domain.LDe*domain.wpe*domain.wpe;
 
-        part.vel[0] -= 0.5*qm*((domain.density*Const::QE*domain.L)/(Const::EPS_0*domain.W*domain.vel_norm))*part_ef*domain.DT;
+        part.vx -= 0.5*qm*((domain.density*Const::QE*domain.L)/(Const::EPS_0*domain.W*domain.vel_norm))*part_ef*domain.DT;
                 
     }
 }
@@ -460,9 +459,9 @@ double Species::Compute_KE(Species &species)
     for (Particle &part : part_list)
     {
         // Compute average velocity in each direction
-        double v_avg_x = (part.vel[0]);
-        double v_avg_y = (part.vel[1]);
-        double v_avg_z = (part.vel[2]);
+        double v_avg_x = (part.vx);
+        double v_avg_y = (part.vy);
+        double v_avg_z = (part.vz);
 
         // Compute squared velocity magnitude
         double v_squre = v_avg_x * v_avg_x + v_avg_y * v_avg_y + v_avg_z * v_avg_z;
@@ -497,9 +496,9 @@ std::tuple<double, double, double> Species::Compute_Momentum(Species &species)
     for (Particle &part : part_list)
     {
         // Compute total momentum in each direction (average velocity)
-        p_x += (part.vel[0]) * domain.vel_norm;
-        p_y += (part.vel[1])* domain.vel_norm;
-        p_z += (part.vel[2])* domain.vel_norm;
+        p_x += (part.vx) * domain.vel_norm;
+        p_y += (part.vy)* domain.vel_norm;
+        p_z += (part.vz)* domain.vel_norm;
     }
 
     // Multiply by mass and spwt (statistical weight)
